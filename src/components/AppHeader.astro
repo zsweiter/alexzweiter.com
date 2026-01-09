@@ -1,0 +1,75 @@
+---
+import Logo from "@/components/Logo.astro";
+import { getLangFromUrl, useTranslations, useLocalePath } from "@/i18n/utils";
+
+const { pathname } = Astro.url;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const localePath = useLocalePath(lang);
+
+const menu = [
+    {
+        url: localePath("/about"),
+        label: t("nav.about"),
+    },
+    {
+        url: localePath("/music"),
+        label: t("nav.music"),
+    },
+    {
+        url: localePath("/works"),
+        label: t("nav.works"),
+    },
+];
+---
+
+<nav
+    class="app-nav text-center fixed top-[10vh] left-0 right-0 w-full p-8 flex justify-between items-start z-50 mix-blend-difference"
+    transition:name="nav"
+>
+    <div
+        class="app-nav-items flex items-center gap-12 font-mono text-xs tracking-widest pointer-events-auto mx-auto opacity-0"
+    >
+        {
+            menu.map((item) => (
+                <a
+                    href={item.url}
+                    class="nav-link font-light text-xl uppercase text-slate-100 tracking-[0.4em] hover:text-cyan-500 transition-colors duration-300"
+                >
+                    {item.label}
+                </a>
+            ))
+        }
+        {
+            pathname !== "/" && (
+                <>
+                    <a href="/" class="group a-logo transition-slide-down rotate-90">
+                        <Logo class={"size-14 text-cyan-400"} />
+                    </a>
+                    <a href="">
+                        <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-languages-icon lucide-languages"
+                        >
+                            <g>
+                                <path d="m5 8 6 6" />
+                                <path d="m4 14 6-6 2-3" />
+                                <path d="M2 5h12" />
+                                <path d="M7 2h1" />
+                                <path d="m22 22-5-10-5 10" />
+                                <path d="M14 18h6" />
+                            </g>
+                        </svg>
+                    </a>
+                </>
+            )
+        }
+    </div>
+</nav>

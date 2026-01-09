@@ -1,0 +1,15 @@
+---
+import MusicPage from "@/components/pages/music.astro";
+import { usePageTranslation } from "@/i18n/pages";
+import { getLangFromUrl } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const pt = usePageTranslation(lang);
+---
+
+<MusicPage
+    seo={{
+        title: pt("music.seo.title"),
+        description: pt("music.seo.description"),
+    }}
+/>

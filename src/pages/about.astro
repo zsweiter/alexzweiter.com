@@ -1,0 +1,25 @@
+---
+import { getLangFromUrl } from "@/i18n/utils";
+import AboutPage from "@/components/pages/about.astro";
+import { usePageTranslation } from "@/i18n/pages";
+
+const lang = getLangFromUrl(Astro.url);
+const pt = usePageTranslation(lang);
+---
+
+<AboutPage
+    seo={{
+        title: pt("about.seo.title"),
+        description: pt("about.seo.description"),
+    }}
+    title={pt("about.title")}
+    bio={pt("about.bio", "array")}
+    stack={{
+        title: pt("about.stack.title"),
+        items: pt("about.stack.items", "array"),
+    }}
+    experience={{
+        title: pt("about.experience.title"),
+        items: pt("about.experience.items", "array"),
+    }}
+/>

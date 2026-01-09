@@ -1,0 +1,23 @@
+---
+import HomePage from "@/components/pages/home.astro";
+import { defaultLang, languages } from "@/i18n/ui";
+import { useTranslations } from "@/i18n/utils";
+
+export async function getStaticPaths() {
+    const paths = Object.keys(languages)
+        .filter((a) => a !== defaultLang)
+        .map((page) => {
+            return {
+                params: {
+                    locale: page,
+                },
+            };
+        });
+
+    return paths;
+}
+
+const t = useTranslations(Astro.params.locale as any);
+---
+
+<HomePage title={t("web.title")} description={t("web.description")} slogan={t("web.slogan")} />

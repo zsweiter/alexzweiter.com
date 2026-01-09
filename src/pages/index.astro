@@ -1,0 +1,10 @@
+---
+import HomePage from "@/components/pages/home.astro";
+import { usePageTranslation } from "@/i18n/pages";
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const pt = usePageTranslation(lang);
+---
+
+<HomePage title={pt("home.seo.title")} description={pt("home.seo.description")} slogan={pt("home.hero.subtitle")} />

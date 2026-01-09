@@ -1,0 +1,60 @@
+---
+import { getLangFromUrl } from "@/i18n/utils";
+import WorksPage from "@/components/pages/works.astro";
+import { usePageTranslation } from "@/i18n/pages";
+
+const projects = [
+    {
+        title: "Janque ORG Community Website",
+        description:
+            "A community-driven website created as a shared digital space for a Quechua-speaking community. The project focuses on accessibility, storytelling, and content sharing, using modern web technologies while keeping the platform simple and sustainable.",
+        stack: ["Nuxt 4", "Nuxt Content", "Jamstack"],
+        status: "Active / Evolving",
+        preview: "https://janque.org",
+        repo: "https://github.com/your-username/janque-org",
+        created_at: "2024",
+    },
+    {
+        title: "Vayload CMS",
+        description:
+            "A custom headless CMS built to support community-focused platforms like Janque ORG. Designed with a Microkernel architecture, it enables modular growth, plugin-based extensions, and scripting for long-term adaptability.",
+        stack: ["Go", "Svelte", "Lua", "Microkernel Architecture"],
+        status: "In Development",
+        preview: null,
+        repo: "https://github.com/your-username/vayload",
+        created_at: "2024",
+    },
+    {
+        title: "Swilen Framework",
+        description:
+            "An experimental PHP framework inspired by Laravel and Express, developed to explore backend architecture, testing practices, and framework design. Released as a beta and later discontinued.",
+        stack: ["PHP 7.4", "PHP 8 (Planned)", "Pest"],
+        status: "Beta / Discontinued",
+        preview: null,
+        repo: "https://github.com/your-username/swilen",
+        created_at: "2023",
+    },
+    {
+        title: "Encrypted Real-Time Chat Experiment",
+        description:
+            "A real-time chat application built as an experiment in secure communication, implementing RSA-based end-to-end encryption over WebSockets to explore privacy and cryptographic patterns.",
+        stack: ["React", "Node.js", "WebSockets", "RSA Encryption"],
+        status: "Experimental",
+        preview: null,
+        repo: "https://github.com/your-username/encrypted-chat",
+        created_at: "2025",
+    },
+];
+
+const lang = getLangFromUrl(Astro.url);
+const pt = usePageTranslation(lang);
+---
+
+<WorksPage
+    seo={{
+        title: pt("works.seo.title"),
+        description: pt("works.seo.description"),
+    }}
+    title={pt("works.title")}
+    projects={pt("works.projects", "array")}
+/>

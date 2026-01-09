@@ -1,0 +1,39 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Astro build output
+dist/
+.astro/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Cache
+.cache/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+!.vscode/extensions.json
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Especials
+public/*.html
+textures/
+!textures/bg.jpg
+!textures/bg-optional.jpg
+!textures/grunge.jpg

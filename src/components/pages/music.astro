@@ -1,0 +1,43 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import MusicPlayer from "../MusicPlayer.svelte";
+
+interface Props {
+    seo: {
+        title: string;
+        description: string;
+    };
+}
+
+const { seo } = Astro.props;
+const tracks = [
+    {
+        title: "Kill ’Em With Kindness",
+        artist: "Selena Gomez — Zweiter Remix (Demo)",
+        src: "/music/selena.mp3",
+    },
+    {
+        title: "Apollo",
+        artist: "Timebelle — Zweiter Remix (Demo)",
+        src: "/music/timebelle.mp3",
+    },
+    {
+        title: "Uncover",
+        artist: "Zara Larsson — Zweiter Remix (Demo)",
+        src: "/music/zara.mp3",
+    },
+    {
+        title: "Include",
+        artist: "Zweiter — Demo",
+        src: "/music/include.mp3",
+    },
+];
+---
+
+<Layout title={seo.title} description={seo.description} galaxy="zoomOut">
+    <section class="w-full min-h-screen flex flex-col items-center justify-center pointer-events-none pt-24">
+        <div class="z-10 text-center pointer-events-auto mix-blend-difference w-full max-w-2xl px-6" data-ws-fade>
+            <MusicPlayer client:load playlist={tracks} />
+        </div>
+    </section>
+</Layout>

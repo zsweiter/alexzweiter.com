@@ -1,0 +1,30 @@
+---
+import WorksPage from "@/components/pages/works.astro";
+import { usePageTranslation } from "@/i18n/pages";
+import { defaultLang, languages } from "@/i18n/ui";
+
+export async function getStaticPaths() {
+    const paths = Object.keys(languages)
+        .filter((a) => a !== defaultLang)
+        .map((page) => {
+            return {
+                params: {
+                    locale: page,
+                },
+            };
+        });
+
+    return paths;
+}
+
+const pt = usePageTranslation(Astro.params.locale);
+---
+
+<WorksPage
+    seo={{
+        title: pt("works.seo.title"),
+        description: pt("works.seo.description"),
+    }}
+    title={pt("works.title")}
+    projects={pt("works.projects", "array")}
+/>

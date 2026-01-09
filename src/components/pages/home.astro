@@ -1,0 +1,83 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import LanguagePicker from "../LanguagePicker.astro";
+
+interface Props {
+    title: string;
+    description: string;
+    slogan: string;
+}
+
+const { title, description, slogan } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+    <section class="relative h-screen w-full flex flex-col items-center justify-center">
+        <div class="z-10 flex flex-col items-center justify-center mix-blend-overlay">
+            <h1 id="hero-title" style="letter-spacing: 0.2em;" class="text-6xl md:text-9xl">
+                {
+                    "ALEX ZWEITER"
+                        .split("")
+                        .map((char, index) =>
+                            char === " " ? (
+                                <span style="width: 1ch; display: inline-block;" />
+                            ) : (
+                                <span style={`transition-delay: ${index * 0.05}s`}>{char}</span>
+                            )
+                        )
+                }
+            </h1>
+
+            <div class="mt-12 flex items-center gap-4 hero-slogan">
+                <div class="h-1 w-12 bg-red-600 hero-slogan-line"></div>
+                <h2 class="text-xs md:text-sm tracking-[0.5em] text-cyan uppercase hero-slogan-text">
+                    {slogan}
+                </h2>
+                <div class="h-1 w-12 bg-red-600 hero-slogan-line"></div>
+            </div>
+            <div>
+                <LanguagePicker current="en" onChange={(code: any) => console.log("Language changed to:", code)} />
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<style is:global>
+    #hero-title {
+        color: #0fa3cf;
+        overflow: hidden;
+    }
+    #hero-title span {
+        display: inline-block;
+        transform: translateY(110%);
+        transition:
+            transform 0.75s cubic-bezier(0.19, 1, 0.22, 1),
+            opacity 0.25s ease;
+        opacity: 0;
+    }
+
+    .page-loaded #hero-title span {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .hero-slogan-text {
+        opacity: 0;
+        transition: opacity 1s ease;
+    }
+    .hero-slogan-line {
+        height: 0;
+        transition:
+            height 1s ease,
+            opacity 1s ease;
+        opacity: 0;
+    }
+
+    .page-loaded .hero-slogan-text {
+        opacity: 1;
+    }
+    .page-loaded .hero-slogan-line {
+        height: 4px;
+        opacity: 1;
+    }
+</style>
