@@ -33,7 +33,7 @@ logs/
 
 # Especials
 public/*.html
-textures/
+textures/*
 !textures/bg.jpg
 !textures/bg-optional.jpg
 !textures/grunge.jpg
