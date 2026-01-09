@@ -266,7 +266,7 @@ class NebulaBackground {
     public createBackgroundSound() {
         this.audioCtx = new AudioContext();
 
-        fetch("/music/background.wav")
+        fetch("/music/background.mp3")
             .then((r) => r.arrayBuffer())
             .then((b) => this.audioCtx.decodeAudioData(b))
             .then((buffer) => {
