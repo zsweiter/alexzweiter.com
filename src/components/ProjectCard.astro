@@ -1,6 +1,6 @@
 ---
-import Github from "@/components/icons/Github.astro";
-import ExternalLink from "@/components/icons/ExternalLink.astro";
+import Github from '@/components/icons/GitHubMono.astro';
+import ExternalLink from '@/components/icons/ExternalLink.astro';
 
 interface Props {
     index: number;
@@ -17,7 +17,8 @@ const props = Astro.props;
 ---
 
 <div
-    class="group relative bg-slate-900/40 border border-slate-800/50 p-8 rounded-lg hover:border-cyan-500/50 transition-all duration-500 flex flex-col h-full"
+    class="group relative bg-slate-900/50 border border-slate-800/50 p-8 rounded-lg hover:border-cyan-500/50 transition-all duration-500 flex flex-col h-full"
+    style={`--translate-y: 16%;`}
 >
     <div
         class="flex justify-between items-baseline mb-4 font-mono text-xs text-gray-500 group-hover:text-cyan-400 transition-colors"
@@ -33,14 +34,24 @@ const props = Astro.props;
         <div class="flex items-center gap-4">
             {
                 props.repository && (
-                    <a href={props.repository} target="_blank" rel="noopener noreferrer">
+                    <a
+                        class="hover:text-red-500 transition-colors"
+                        href={props.repository}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         <Github class="size-4" />
                     </a>
                 )
             }
             {
                 props.preview && (
-                    <a href={props.preview} target="_blank" rel="noopener noreferrer">
+                    <a
+                        class="hover:text-red-500 transition-colors"
+                        href={props.preview}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         <ExternalLink class="size-4" />
                     </a>
                 )
@@ -52,7 +63,7 @@ const props = Astro.props;
 
     <div class="flex flex-wrap gap-2">
         {
-            props.stack.map((tech) => (
+            props.stack.map(tech => (
                 <span class="text-[10px] font-p uppercase tracking-wider px-3 py-1 bg-white/5 text-slate-300 rounded-full border border-white/10">
                     {tech}
                 </span>

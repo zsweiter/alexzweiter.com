@@ -1,21 +1,22 @@
 ---
-import "@fontsource-variable/spline-sans-mono";
-import "@/assets/css/main.css";
-import AppHeader from "@/components/AppHeader.astro";
-import { ClientRouter } from "astro:transitions";
-import { getLangFromUrl } from "@/i18n/utils";
+import '@fontsource-variable/spline-sans-mono';
+import '@/assets/css/main.css';
+import AppHeader from './parts/AppHeader.astro';
+import AppFooter from './parts/AppFooter.astro';
+import { ClientRouter } from 'astro:transitions';
+import { getLangFromUrl } from '@/i18n/utils';
 
 interface Props {
     title: string;
     description: string;
-    galaxy?: "reinit" | "zoomOut" | "zoomIn" | "zoomReset";
 }
 
-const { title, description, galaxy } = Astro.props;
+const { title, description } = Astro.props;
 const { pathname } = Astro.url;
 const lang = getLangFromUrl(Astro.url);
 
-const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//g, "").toLowerCase()}`;
+const pageClass = pathname === '/' ? 'page-home' : `page-${pathname.replace(/\//g, '').toLowerCase()}`;
+const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase();
 ---
 
 <!doctype html>
@@ -24,13 +25,12 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
         <meta charset="UTF-8" />
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width" />
-        <!-- <link rel="icon" href="/favicon.ico" sizes="any" /> -->
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
         <title>{title}</title>
         <script is:inline>
             function normalizePath(path) {
-                return path.replace(/\/+$/, "") || "/";
+                return path.replace(/\/+$/, '') || '/';
             }
 
             function isSameUrl(a, b) {
@@ -41,14 +41,14 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
                 );
             }
 
-            document.addEventListener("click", function (e) {
+            document.addEventListener('click', function (e) {
                 var target = e.target;
-                var link = target.closest("a[href]");
+                var link = target.closest('a[href]');
 
                 if (!link) return;
-                if (link.target === "_blank") return;
-                if (link.hasAttribute("download")) return;
-                if (link.getAttribute("rel") === "external") return;
+                if (link.target === '_blank') return;
+                if (link.hasAttribute('download')) return;
+                if (link.getAttribute('rel') === 'external') return;
 
                 var to = new URL(link.href, window.location.href);
                 var from = new URL(window.location.href);
@@ -59,13 +59,15 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
 
                     if (to.hash) {
                         document.querySelector(to.hash)?.scrollIntoView({
-                            behavior: "smooth",
+                            behavior: 'smooth'
                         });
                     }
+                } else {
+                    document.body.classList.remove('page-loaded');
                 }
             });
 
-            if (typeof window.AppEvent !== "object") {
+            if (typeof window.AppEvent !== 'object') {
                 window.AppEvent = {
                     subscribers: {},
 
@@ -88,65 +90,103 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
                                 return fn !== cb;
                             });
                         };
-                    },
+                    }
                 };
             }
         </script>
+        <script is:inline data-astro-rerun>
+            (function () {
+                var styleEl = document.getElementById('viewport-variables');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = 'viewport-variables';
+                    document.head.appendChild(styleEl);
+                }
+
+                function setViewportUnits() {
+                    var vh = window.innerHeight;
+                    var vw = window.innerWidth;
+
+                    var safeTop = 'env(safe-area-inset-top)';
+                    var safeBottom = 'env(safe-area-inset-bottom)';
+                    var safeLeft = 'env(safe-area-inset-left)';
+                    var safeRight = 'env(safe-area-inset-right)';
+
+                    styleEl.textContent = `:root { --vh: ${vh}px; --vw: ${vw}px; --safe-top: ${safeTop}; --safe-bottom: ${safeBottom}; --safe-left: ${safeLeft}; --safe-right: ${safeRight}; }`;
+                }
+
+                setViewportUnits();
+
+                var timeout;
+                function throttledResize() {
+                    if (timeout) clearTimeout(timeout);
+                    timeout = setTimeout(setViewportUnits, 150);
+                }
+
+                window.addEventListener('resize', throttledResize);
+                window.addEventListener('orientationchange', throttledResize);
+            })();
+        </script>
 
         <ClientRouter />
-        <style is:inline>
-            html {
-                background-color: black;
-            }
-        </style>
     </head>
 
-    <body class={`${pageClass}`} data-galaxy={galaxy}>
+    <body class={`${pageClass}`} data-page={page}>
         <AppHeader />
-        <main class="relative z-10 w-full min-h-screen flex flex-col" transition:animate="fade">
+        <main class="relative z-10 w-full min-h-screen flex flex-col" transition:name="view">
             <slot />
         </main>
 
         <audio style="display:none;" id="audio-player" transition:persist></audio>
-        <div id="canvas-container" class="canvas-container" transition:persist>
-            <canvas id="webgl-canvas"></canvas>
-        </div>
+        <div id="canvas-container" class="canvas-container" transition:persist></div>
         <div class="vignette-panel vignette-panel-top"></div>
         <div class="vignette-panel vignette-panel-bottom"></div>
 
-        <script>
-            import { galaxy } from "@/webgl/background";
+        <AppFooter />
 
-            document.addEventListener("astro:page-load", (a) => {
+        <script>
+            import { galaxy } from '@/webgl/background';
+
+            document.addEventListener('astro:page-load', a => {
                 const timeout = window.loaded ? 500 : 1000;
                 setTimeout(() => {
-                    document.body.classList.add("page-loaded");
+                    document.body.classList.add('page-loaded');
                 }, timeout);
 
-                const galaxyType = document.body.getAttribute("data-galaxy");
-                if (galaxyType === "reinit") {
-                    galaxy.reinit();
-                } else if (galaxyType === "zoomOut") {
-                    galaxy.zoomOut(0.5);
-                } else if (galaxyType === "zoomIn") {
-                    galaxy.zoomIn();
-                } else if (galaxyType === "zoomReset") {
-                    galaxy.zoomReset();
+                const page = document.body.getAttribute('data-galaxy') || 'home';
+
+                if (page == 'home') {
+                    if (galaxy.isLastImageLoaded(galaxy.MAIN_TEXTURE)) {
+                        galaxy.reinit();
+                    } else {
+                        galaxy.restoreBackgroundTexture();
+                        galaxy.zoomReset();
+                    }
+                } else {
+                    /*    if (!galaxy.isLastImageLoaded(galaxy.OPTIONAL_TEXTURE)) {
+                        galaxy.transitionToTexture(galaxy.OPTIONAL_TEXTURE);
+                    }
+ */
+                    if (Math.random() > 0.5) {
+                        galaxy.zoomOut(0.65);
+                    } else {
+                        galaxy.zoomIn();
+                    }
                 }
 
-                document.querySelectorAll("[data-ws-staggered]").forEach((item) => {
-                    Array.from(item.children).map((a, index) => {
+                document.querySelectorAll('[data-ws-staggered]').forEach(item => {
+                    Array.from(item.children).forEach((a, index) => {
                         const el = a as HTMLElement;
-                        el.style.setProperty("--delay", `${index * 150}ms`);
-                        el.style.setProperty("--translate-y", "25px");
+                        if (el.tagName === 'SCRIPT') return;
+                        el.style.setProperty('--delay', `${index * 150}ms`);
                     });
                 });
 
-                document.querySelectorAll<HTMLElement>("[data-ws-reveal]").forEach((item) => {
-                    if (item.querySelector(":scope > .ws-reveal-element")) return;
+                document.querySelectorAll<HTMLElement>('[data-ws-reveal]').forEach(item => {
+                    if (item.querySelector(':scope > .ws-reveal-element')) return;
 
-                    const wrapper = document.createElement("div");
-                    wrapper.classList.add("ws-reveal-element");
+                    const wrapper = document.createElement('div');
+                    wrapper.classList.add('ws-reveal-element');
 
                     while (item.firstChild) {
                         wrapper.appendChild(item.firstChild);
@@ -156,10 +196,12 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
                 });
             });
 
-            const audioPlayer = document.getElementById("audio-player") as HTMLAudioElement & { index: number };
+            const audioPlayer = document.getElementById('audio-player') as HTMLAudioElement & { index: number };
 
             window.audio = audioPlayer;
-            window.AppEvent.listen("audio:play", ({ src, index }: any) => {
+            window.AppEvent.listen('audio:play', ({ src, index, track }: any) => {
+                galaxy.transitionToTexture(track.poster);
+                galaxy.zoomReset();
                 galaxy.fadedPauseSound().then(() => {
                     audioPlayer.src = src;
                     audioPlayer.index = index;
@@ -167,36 +209,43 @@ const pageClass = pathname === "/" ? "page-home" : `page-${pathname.replace(/\//
                         audioPlayer.play();
                     };
                 });
+
+                galaxy.setPoster(track.poster);
             });
 
-            window.AppEvent.listen("audio:resume", () => {
+            window.AppEvent.listen('audio:resume', ({ track }: any) => {
                 galaxy.fadedPauseSound().then(() => {
                     audioPlayer.play();
                 });
+
+                galaxy.setPoster(track.poster);
             });
 
-            window.AppEvent.listen("audio:pause", () => {
+            window.AppEvent.listen('audio:pause', () => {
                 audioPlayer.pause();
                 galaxy.fadedResumeSound();
+                galaxy.restoreBackgroundTexture();
+
+                galaxy.disposePoster();
             });
 
-            window.AppEvent.listen("audio:seek", (percentage: number) => {
+            window.AppEvent.listen('audio:seek', (percentage: number) => {
                 audioPlayer.currentTime = percentage * audioPlayer.duration;
             });
 
-            audioPlayer.addEventListener("timeupdate", () => {
-                window.AppEvent.dispatch("audio:progress", {
+            audioPlayer.addEventListener('timeupdate', () => {
+                window.AppEvent.dispatch('audio:progress', {
                     currentTime: audioPlayer.currentTime,
                     duration: audioPlayer.duration,
-                    progress: audioPlayer.currentTime / audioPlayer.duration || 0,
+                    progress: audioPlayer.currentTime / audioPlayer.duration || 0
                 });
             });
         </script>
         <script>
-            import { galaxy } from "@/webgl/background";
-            const canvas = document.querySelector<HTMLCanvasElement>("#webgl-canvas");
-            if (canvas) {
-                galaxy.setup(canvas);
+            import { galaxy } from '@/webgl/background';
+            const container = document.querySelector<HTMLElement>('#canvas-container');
+            if (container) {
+                galaxy.setup(container);
 
                 setTimeout(() => {
                     window.loaded = true;

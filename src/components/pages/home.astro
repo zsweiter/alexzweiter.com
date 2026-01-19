@@ -1,6 +1,7 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import LanguagePicker from "../LanguagePicker.astro";
+import Layout from '@/layouts/Layout.astro';
+import LanguagePicker from '../LanguagePicker.astro';
+import Logo from '../Logo.astro';
 
 interface Props {
     title: string;
@@ -9,35 +10,41 @@ interface Props {
 }
 
 const { title, description, slogan } = Astro.props;
+const [firstSlogan, secondSlogan] = slogan.split('|');
 ---
 
 <Layout title={title} description={description}>
     <section class="relative h-screen w-full flex flex-col items-center justify-center">
-        <div class="z-10 flex flex-col items-center justify-center mix-blend-overlay">
-            <h1 id="hero-title" style="letter-spacing: 0.2em;" class="text-6xl md:text-9xl">
+        <div class="z-10 flex flex-col items-center justify-center px-6">
+            <h1 id="hero-title" style="letter-spacing: 0.2em;" class="text-7xl md:text-9xl text-center">
                 {
-                    "ALEX ZWEITER"
-                        .split("")
+                    'ALEX ZWEITER'
+                        .split('')
                         .map((char, index) =>
-                            char === " " ? (
-                                <span style="width: 1ch; display: inline-block;" />
+                            char === ' ' ? (
+                                <span class="hero-title-separator" />
                             ) : (
-                                <span style={`transition-delay: ${index * 0.05}s`}>{char}</span>
+                                <span style={`transition-delay: ${(index * 0.05).toFixed(2)}s`}>{char}</span>
                             )
                         )
                 }
             </h1>
 
-            <div class="mt-12 flex items-center gap-4 hero-slogan">
-                <div class="h-1 w-12 bg-red-600 hero-slogan-line"></div>
-                <h2 class="text-xs md:text-sm tracking-[0.5em] text-cyan uppercase hero-slogan-text">
+            <div class="mt-12 flex items-center gap-4 hero-slogan font-sans text-center">
+                <div class="h-1 w-4 md:w-12 bg-red-600 hero-slogan-line"></div>
+                <h2 class="desktop-slogan text-2xl tracking-[0.5em] text-cyan uppercase hero-slogan-text">
                     {slogan}
                 </h2>
-                <div class="h-1 w-12 bg-red-600 hero-slogan-line"></div>
+                <h2 class="mobile-slogan text-sm tracking-[0.5em] text-cyan uppercase hero-slogan-text">
+                    {firstSlogan}
+                    <br />
+                    {secondSlogan}
+                </h2>
+                <div class="h-1 w-4 md:w-12 bg-red-600 hero-slogan-line"></div>
             </div>
-            <div>
+            <!-- <div>
                 <LanguagePicker current="en" onChange={(code: any) => console.log("Language changed to:", code)} />
-            </div>
+            </div> -->
         </div>
     </section>
 </Layout>
@@ -54,6 +61,7 @@ const { title, description, slogan } = Astro.props;
             transform 0.75s cubic-bezier(0.19, 1, 0.22, 1),
             opacity 0.25s ease;
         opacity: 0;
+        font-weight: 500;
     }
 
     .page-loaded #hero-title span {
@@ -79,5 +87,28 @@ const { title, description, slogan } = Astro.props;
     .page-loaded .hero-slogan-line {
         height: 4px;
         opacity: 1;
+    }
+
+    .hero-title-separator {
+        display: block !important; /** because the animation need inline-block */
+        width: 1ch;
+    }
+
+    @media screen and (min-width: 64em) {
+        .hero-title-separator {
+            display: inline-block !important; /** because the animation need inline-block */
+        }
+        .mobile-slogan {
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: 64em) {
+        .desktop-slogan {
+            display: none;
+        }
+        .hero-slogan-line {
+            display: none;
+        }
     }
 </style>

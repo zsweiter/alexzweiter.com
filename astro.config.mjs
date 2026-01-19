@@ -1,10 +1,11 @@
 import { defineConfig } from "astro/config";
 
 import tailwindcss from "@tailwindcss/vite";
-import svelte from "@astrojs/svelte";
 
 export default defineConfig({
-    integrations: [svelte()],
+    devToolbar: {
+        enabled: false,
+    },
     i18n: {
         locales: ["es", "en", "pt"],
         defaultLocale: "en",
@@ -12,7 +13,7 @@ export default defineConfig({
             prefixDefaultLocale: false,
         },
     },
-    trailingSlash: 'never',
+    trailingSlash: "never",
     server: {
         port: 5050,
     },

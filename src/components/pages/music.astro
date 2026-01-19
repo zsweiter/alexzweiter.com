@@ -1,6 +1,6 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import MusicPlayer from "../MusicPlayer.svelte";
+import Layout from '@/layouts/Layout.astro';
+import SoundPLayer from '../SoundPLayer.astro';
 
 interface Props {
     seo: {
@@ -12,32 +12,143 @@ interface Props {
 const { seo } = Astro.props;
 const tracks = [
     {
-        title: "Kill ’Em With Kindness",
-        artist: "Selena Gomez — Zweiter Remix (Demo)",
-        src: "/music/selena.mp3",
+        title: 'Kill ’Em With Kindness',
+        artist: 'Selena Gomez — Zweiter Remix (Demo)',
+        _poster: '/textures/snow-bg.jpg',
+        poster: '/posters/kill-em-with-kidness.png',
+        src: '/music/selena.mp3'
     },
     {
-        title: "Apollo",
-        artist: "Timebelle — Zweiter Remix (Demo)",
-        src: "/music/timebelle.mp3",
+        title: 'Apollo',
+        artist: 'Timebelle — Zweiter Remix (Demo)',
+        _poster: '/textures/planet-red.png',
+        poster: '/posters/apollo.png',
+        src: '/music/timebelle.mp3'
     },
     {
-        title: "Uncover",
-        artist: "Zara Larsson — Zweiter Remix (Demo)",
-        src: "/music/zara.mp3",
+        title: 'Uncover',
+        artist: 'Zara Larsson — Zweiter Remix (Demo)',
+        _poster: '/textures/snow-bg.jpg',
+        poster: '/textures/unquarters.jpg',
+        src: '/music/zara.mp3'
     },
     {
-        title: "Include",
-        artist: "Zweiter — Demo",
-        src: "/music/include.mp3",
-    },
+        title: 'Include',
+        artist: 'Zweiter — Demo',
+        poster: '/textures/planet-red.png',
+        src: '/music/include.mp3'
+    }
 ];
 ---
 
-<Layout title={seo.title} description={seo.description} galaxy="zoomOut">
-    <section class="w-full min-h-screen flex flex-col items-center justify-center pointer-events-none pt-24">
+<Layout title={seo.title} description={seo.description}>
+    <section
+        class="w-full min-h-screen flex flex-col items-center justify-center pointer-events-none pt-24"
+        id="music-root"
+    >
+        <div class="music-title" s-text="track.title"></div>
         <div class="z-10 text-center pointer-events-auto mix-blend-difference w-full max-w-2xl px-6" data-ws-fade>
-            <MusicPlayer client:load playlist={tracks} />
+            <SoundPLayer playlist={tracks} />
         </div>
     </section>
+
+    <!-- DATASTORE -->
+    <script is:inline type="application/json" id="music-data" set:html={JSON.stringify(tracks)} />
 </Layout>
+
+<script>
+    import { reactive, provide, hydrate } from '@packages/z-state';
+
+    function getIndex(el: HTMLElement) {
+        const host = el?.closest('[data-index]') || el;
+        if (!host) return null;
+        const v = host.getAttribute('data-index');
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    }
+
+    const state = reactive({
+        isPlaying: false,
+        currentTrackIndex: 0,
+        progress: 0,
+        playlist: JSON.parse(document.getElementById('music-data')?.textContent || '[]'),
+
+        playTrack(index: number) {
+            if (index !== this.currentTrackIndex) {
+                this.currentTrackIndex = index;
+                this.progress = 0;
+            }
+            this.isPlaying = true;
+
+            window.AppEvent.dispatch('audio:play', {
+                src: this.playlist[index].src,
+                index,
+                track: this.playlist[index]
+            });
+        },
+        handlePlayTrack(event: MouseEvent, el: HTMLElement) {
+            const index = getIndex(event.currentTarget as HTMLElement) || 0;
+            this.playTrack(index);
+        },
+        pauseTrack() {
+            this.isPlaying = false;
+        },
+        togglePlay() {
+            if (!window.audio || window.audio?.src === '') {
+                this.playTrack(0);
+                return;
+            }
+
+            if (this.isPlaying) {
+                window.AppEvent.dispatch('audio:pause');
+                this.isPlaying = false;
+            } else {
+                window.AppEvent.dispatch('audio:resume', {
+                    track: this.playlist[this.currentTrackIndex]
+                });
+                this.isPlaying = true;
+            }
+        },
+        nextTrack() {
+            const newIndex = (this.currentTrackIndex + 1) % this.playlist.length;
+            console.log({ newIndex });
+            this.playTrack(newIndex);
+        },
+        prevTrack() {
+            const newIndex = this.currentTrackIndex === 0 ? this.playlist.length - 1 : this.currentTrackIndex - 1;
+            console.log({ newIndex });
+            this.playTrack(newIndex);
+        },
+        onSeek(event: MouseEvent) {
+            const target = event.currentTarget as HTMLDivElement;
+            const rect = target.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = clickX / rect.width;
+
+            window.AppEvent.dispatch('audio:seek', percentage);
+        },
+
+        get track() {
+            return this.playlist[this.currentTrackIndex];
+        }
+    });
+
+    provide('audioState', state);
+
+    document.addEventListener('astro:page-load', () => {
+        const root = document.getElementById('music-root') as HTMLElement;
+
+        if (window.audio) {
+            state.currentTrackIndex = window.audio.index || 0;
+            state.isPlaying = !window.audio.paused;
+        }
+
+        window.AppEvent.listen('audio:progress', (data: any) => {
+            state.progress = data.progress;
+        });
+
+        if (root && state) {
+            hydrate(root, state);
+        }
+    });
+</script>

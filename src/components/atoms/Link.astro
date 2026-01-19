@@ -1,0 +1,22 @@
+---
+import { getLangFromUrl, useLocalePath } from '@/i18n/utils';
+
+interface Props {
+    href: string;
+    class?: string;
+    active?: boolean;
+    style?: string;
+}
+
+const lang = getLangFromUrl(Astro.url);
+const localePath = useLocalePath(lang);
+
+const { href, class: className, active, ...props } = Astro.props;
+
+const path = localePath(href);
+const isActive = Astro.url.pathname === path;
+---
+
+<a href={path} {...props} class:list={[className, { active: isActive }]} aria-current={isActive ? 'page' : undefined}>
+    <slot />
+</a>

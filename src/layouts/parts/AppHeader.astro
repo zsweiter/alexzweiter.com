@@ -1,0 +1,331 @@
+---
+import Logo from '@/components/Logo.astro';
+import Link from '@/components/atoms/Link.astro';
+import Languages from '@/components/icons/Languages.astro';
+import { getLangFromUrl, useTranslations, computeCurrentLocale, isSameLocalePath } from '@/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const currentPath = computeCurrentLocale(Astro.url, lang);
+const isSamePath = isSameLocalePath(Astro.url, lang);
+const isHome = isSamePath('/');
+
+const menu = [
+    {
+        url: '/about',
+        label: t('nav.about')
+    },
+    {
+        url: '/music',
+        label: t('nav.music')
+    },
+    {
+        url: '/works',
+        label: t('nav.works')
+    }
+];
+
+const fullMenu = [
+    {
+        url: '/',
+        label: t('nav.home')
+    },
+    ...menu,
+]
+---
+
+<nav class="w-screen pointer-events-none">
+    {
+        isHome ? (
+            <div class="app-nav-items flex items-center justify-center gap-8 lg:gap-28 font-p tracking-widest pointer-events-auto mx-auto opacity-0">
+                {menu.map(item => (
+                    <Link
+                        href={item.url}
+                        class="nav-link lg:text-xl text-cyan-100 hover:text-cyan-500 transition-colors duration-300"
+                    >
+                        {item.label}
+                    </Link>
+                ))}
+            </div>
+        ) : (
+            <div class="app-nav-items-left flex items-center gap-6 lg:gap-8 font-p tracking-widest pointer-events-auto opacity-0">
+                <div class="desktop-menu flex items-center gap-6 lg:gap-16">
+                    {menu.map(item => (
+                        <Link
+                            href={item.url}
+                            class="nav-link lg:text-xl text-cyan-100 hover:text-cyan-500 transition-colors duration-300"
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                </div>
+                <Link href="/" class="group a-logo transition-slide-down rotate-90">
+                    <Logo class={'size-14 text-cyan-400'} />
+                </Link>
+                <a href={currentPath}>
+                    <Languages class="size-6 rotate-90" />
+                </a>
+            </div>
+
+            <div class="mobile-menu-left fixed top-0 left-0 z-50 flex items-center w-full justify-between px-5 py-4">
+                <div class="flex items-center gap-4">
+                    <Link href="/" class="group a-logo transition-slide-down">
+                        <Logo class={'size-10 text-cyan-400'} />
+                    </Link>
+                    <a href={currentPath}>
+                        <Languages class="size-6 text-slate-200/50" />
+                    </a>
+                </div>
+                <button id="hamburger-btn" class="hamburger-btn mobile-only flex flex-col gap-1.5 justify-center items-end group pointer" aria-label="Menu">
+                    <div class="burger-line w-8 bg-slate-200 transition-all duration-300"></div>
+                    <div class="burger-line w-5 bg-slate-200 transition-all duration-300 group-hover:w-8"></div>
+                    <div class="burger-line w-8 bg-slate-200 transition-all duration-300"></div>
+                </button>
+            </div>
+            <div id="mobile-overlay" class="mobile-overlay fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+                <div class="flex flex-col items-center gap-10">
+                    {fullMenu.map((item, index) => {
+                        return (
+                             <Link
+                                href={item.url}
+                                class={`mobile-nav-link text-2xl tracking-widest transition-all duration-300 text-cyan-100`}
+                                style={`--x-delay: ${index * 125}ms`}
+                            >
+                                {item.label}
+                            </Link>
+                        )
+                    })}
+                </div>
+            </div>
+        )
+    }
+</nav>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const closeOverlay = document.getElementById('close-overlay');
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+        const mobileMenu = document.querySelector('.mobile-menu-left') as HTMLElement;
+        const body = document.body;
+
+        function toggleMenu() {
+            if (mobileOverlay) {
+                const isOpen = mobileOverlay.classList.contains('opacity-100');
+                if (isOpen) {
+                    mobileOverlay.classList.remove('opacity-100', 'pointer-events-auto', 'is-open');
+                    mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    body.style.overflow = '';
+                    hamburgerBtn?.classList.remove('is-open');
+                } else {
+                    mobileOverlay.classList.remove('opacity-0', 'pointer-events-none');
+                    mobileOverlay.classList.add('opacity-100', 'pointer-events-auto', 'is-open');
+                    body.style.overflow = 'hidden';
+                    hamburgerBtn?.classList.add('is-open');
+                }
+            }
+
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleMenu);
+        if (closeOverlay) closeOverlay.addEventListener('click', toggleMenu);
+        
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (mobileOverlay && mobileOverlay.classList.contains('opacity-100')) {
+                    setTimeout(() => {
+                        toggleMenu();
+                    }, 1000)
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const threshold = mobileMenu && mobileMenu.offsetHeight / 2;
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > threshold) {
+                mobileMenu && mobileMenu.classList.add('is-scrolling');
+            } else {
+                mobileMenu && mobileMenu.classList.remove('is-scrolling');
+            }
+        });
+    })
+</script>
+
+<style is:global>
+    .app-nav-items,
+    .app-nav-items-left {
+        opacity: 0;
+        transition: 400ms ease-in-out;
+        transition-property: opacity, transform;
+
+        position: fixed;
+        z-index: 20;
+    }
+    .app-nav-items {
+        left: 0;
+        right: 0;
+        top: 6vh;
+        transform: translateY(2vh);
+    }
+    .app-nav-items-left {
+        display: none; /* hide on mobile */
+    }
+    .nav-link {
+        font: normal normal 14px/1.25 var(--font-p);
+        text-transform: uppercase;
+    }
+    .nav-link[aria-current='page'] {
+        color: tomato;
+    }
+    .app-nav-items .nav-link {
+        letter-spacing: 0.25em;
+    }
+
+    /* Mobile Styles */
+    .desktop-menu {
+        display: none;
+    }
+    
+    .mobile-only {
+        display: flex;
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .app-nav-items-left {
+        left: 20px; 
+        top: 20px;
+        right: auto;
+        flex-direction: row; 
+    }
+    
+    /* Ensure hamburger is clickable */
+    .hamburger-btn {
+        pointer-events: auto;
+        cursor: pointer;
+        z-index: 60; /* Higher than normal items */
+    }
+
+    .page-loaded .app-nav-items-left,
+    .page-loaded .app-nav-items {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /** mobile menu */
+    .mobile-menu-left {
+        z-index: 20;
+        transition: background-color 400ms ease-in-out;
+    }
+    .mobile-menu-left.is-scrolling {
+        background-color: #000000b3;
+    }
+    .mobile-overlay {
+        z-index: 19;
+        background-image: linear-gradient(
+            326deg,
+            rgba(0, 174, 243, 0.04) 0%,
+            rgba(0, 174, 243, 0.04) 6%,
+            rgba(0, 174, 243, 0.035) 6%,
+            rgba(0, 174, 243, 0.035) 29%,
+            rgba(13, 15, 17, 0.04) 29%,
+            rgba(0, 0, 0, 0.04) 100%
+        ),
+        linear-gradient(
+            164deg,
+            rgb(0 0 0 / 48%) 0%,
+            rgb(0 0 0 / 21%) 36%,
+            rgba(0, 174, 243, 0.04) 36%,
+            rgb(0 0 0 / 4%) 61%,
+            rgba(0, 174, 243, 0.045) 61%,
+            rgba(0, 0, 0, 0.04) 100%
+        ),
+        linear-gradient(
+            336deg,
+            rgb(0, 0, 0) 0%,
+            rgb(0 0 0 / 4%) 64%,
+            rgba(0, 174, 243, 0.035) 64%,
+            rgba(0, 174, 243, 0.035) 69%,
+            rgba(0, 0, 0, 0.04) 69%,
+            rgba(0, 0, 0, 0.04) 100%
+        ),
+        linear-gradient(
+            90deg,
+            rgb(0, 0, 0),
+            rgb(0, 0, 0)
+        );
+    }
+    .mobile-nav-link {
+        font: normal normal 34px/1.25 var(--font-p);
+        text-transform: uppercase;
+        opacity: 0;
+        word-spacing: -0.25em;
+        transform: scale(0.9);
+        transition-delay: var(--x-delay, 0ms);
+    }
+    .is-open .mobile-nav-link[aria-current='page'] {
+        font-size: 40px;
+        opacity: 0.8;
+    }
+    .is-open .mobile-nav-link {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    .is-closed .mobile-nav-link {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    /** burger menu */
+    .burger-line {
+        height: 1px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        transform-origin: center;
+    }
+    #hamburger-btn.is-open .burger-line:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 4px);
+    }
+    #hamburger-btn.is-open .burger-line:nth-child(2) {
+        opacity: 0;
+    }
+    #hamburger-btn.is-open .burger-line:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -4px);
+    }
+
+    @media screen and (min-width: 62em) {
+        .nav-link {
+            font-size: 1.25rem;
+        }
+        .app-nav-items .nav-link {
+            letter-spacing: 0.5em;
+        }
+        .app-nav-items {
+            top: 20vh;
+        }
+
+        /** Only in non-home pages and screens larger than 62em */
+        .app-nav-items-left {
+            left: auto;
+            right: 5vw;
+            top: 5vh;
+            transform: translateY(-75%) rotate(-90deg);
+            display: flex;
+            transform-origin: top right; 
+        }
+        .page-loaded .app-nav-items-left {
+            transform: translateY(0px) rotate(-90deg) translateZ(0px);
+        }
+        
+        .desktop-menu {
+            display: flex;
+        }
+        .mobile-only, .mobile-menu-left {
+            display: none;
+        }
+    }
+</style>
