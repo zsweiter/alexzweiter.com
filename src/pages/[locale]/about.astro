@@ -1,16 +1,16 @@
 ---
-import AboutPage from "@/components/pages/about.astro";
-import { defaultLang, languages } from "@/i18n/ui";
-import { usePageTranslation } from "@/i18n/pages";
+import AboutPage from '@/components/pages/about.astro';
+import { defaultLang, languages } from '@/i18n/ui';
+import { usePageTranslation } from '@/i18n/pages';
 
 export async function getStaticPaths() {
     const paths = Object.keys(languages)
-        .filter((a) => a !== defaultLang)
-        .map((page) => {
+        .filter(a => a !== defaultLang)
+        .map(page => {
             return {
                 params: {
-                    locale: page,
-                },
+                    locale: page
+                }
             };
         });
 
@@ -18,22 +18,21 @@ export async function getStaticPaths() {
 }
 
 const pt = usePageTranslation(Astro.params.locale);
-console.log(pt("about.experience.items", "array"))
 ---
 
 <AboutPage
     seo={{
-        title: pt("about.seo.title"),
-        description: pt("about.seo.description"),
+        title: pt('about.seo.title'),
+        description: pt('about.seo.description')
     }}
-    title={pt("about.title")}
-    bio={pt("about.bio", "array")}
+    title={pt('about.title')}
+    bio={pt('about.bio', 'array')}
     stack={{
-        title: pt("about.stack.title"),
-        items: pt("about.stack.items", "array"),
+        title: pt('about.stack.title'),
+        items: pt('about.stack.items', 'array')
     }}
     experience={{
-        title: pt("about.experience.title"),
-        items: pt("about.experience.items", "array"),
+        title: pt('about.experience.title'),
+        items: pt('about.experience.items', 'array')
     }}
 />

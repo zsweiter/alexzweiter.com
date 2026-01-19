@@ -111,12 +111,10 @@ const tracks = [
         },
         nextTrack() {
             const newIndex = (this.currentTrackIndex + 1) % this.playlist.length;
-            console.log({ newIndex });
             this.playTrack(newIndex);
         },
         prevTrack() {
             const newIndex = this.currentTrackIndex === 0 ? this.playlist.length - 1 : this.currentTrackIndex - 1;
-            console.log({ newIndex });
             this.playTrack(newIndex);
         },
         onSeek(event: MouseEvent) {
