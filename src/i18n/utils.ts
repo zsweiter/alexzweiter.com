@@ -1,4 +1,4 @@
-import { ui, defaultLang } from "./ui";
+import { ui, defaultLang, languages } from "./ui";
 
 type Locale = keyof typeof ui;
 type TranslationKey = keyof (typeof ui)[typeof defaultLang];
@@ -17,8 +17,9 @@ export function useTranslations(locale: Locale) {
 
 export const useLocalePath = (locale: Locale) => {
     return (path: string) => {
-        if (locale === defaultLang) return path;
-        return `/${locale}${path}`;
+        const rawPath = path.replace(/\/$/, ""); // Remove trailing slash
+        if (locale === defaultLang) return rawPath;
+        return `/${locale}${rawPath}`;
     };
 };
 
@@ -32,4 +33,18 @@ export const isSameLocalePath = (url: URL, lang: string) => {
     return (path: string) => {
         return localePath(path) === localePath(url.pathname);
     };
+};
+
+export const getLocaleParams = () => {
+    const paths = Object.keys(languages)
+        .filter(a => a !== defaultLang)
+        .map(page => {
+            return {
+                params: {
+                    locale: page
+                }
+            };
+        });
+
+    return paths;
 };

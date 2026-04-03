@@ -14,7 +14,7 @@ const { current = "en", onChange } = Astro.props;
 
 <div class="relative inline-block text-left">
     <button
-        class="flex items-center justify-between w-40 px-4 py-2 bg-slate-100 border border-slate-300 rounded-md text-slate-700 hover:border-cyan-500 hover:ring-1 hover:ring-cyan-500 transition"
+        class="flex items-center justify-between w-40 px-4 py-2 bg-slate-100 border border-slate-300 rounded-md text-slate-700 hover:border-primary-500 hover:ring-1 hover:ring-primary-500 transition"
         type="button"
         aria-haspopup="listbox"
         aria-expanded="false"
@@ -34,7 +34,7 @@ const { current = "en", onChange } = Astro.props;
 
     <ul
         id="language-picker-list"
-        class="hidden absolute mt-1 w-full bg-slate-200/20 border border-cyan-300 rounded-md shadow-lg z-10"
+        class="hidden absolute mt-1 w-full bg-slate-200/20 border border-primary-300 rounded-md shadow-lg z-10"
         role="listbox"
         aria-labelledby="language-picker-button"
     >
@@ -42,7 +42,7 @@ const { current = "en", onChange } = Astro.props;
             languages.map((lang) => (
                 <li
                     role="option"
-                    class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-cyan-50 hover:text-cyan-600 transition"
+                    class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-primary-50 hover:text-primary-600 transition"
                 >
                     <a href={lang.path}>{lang.label}</a>
                 </li>

@@ -32,15 +32,15 @@ function formatTime(seconds: number): string {
 
             <button
                 s-on:click="togglePlay"
-                class="w-16 h-16 rounded-full border border-cyan-500 flex items-center justify-center hover:bg-cyan/10 transition-all group cursor-pointer"
+                class="w-16 h-16 rounded-full border border-primary-500 flex items-center justify-center hover:bg-primary/10 transition-all group cursor-pointer"
                 aria-label="audio controls"
             >
                 <div
-                    class="w-0 h-0 border-t-10 border-t-transparent border-l-16 border-l-cyan border-b-10 border-b-transparent ml-1 transition-transform"
+                    class="w-0 h-0 border-t-10 border-t-transparent border-l-16 border-l-primary border-b-10 border-b-transparent ml-1 transition-transform"
                     s-bind:hidden={'isPlaying'}
                 >
                 </div>
-                <div class="w-4 h-6 border-l-4 border-r-4 border-cyan-500" s-bind:hidden={'!isPlaying'}></div>
+                <div class="w-4 h-6 border-l-4 border-r-4 border-primary-500" s-bind:hidden={'!isPlaying'}></div>
             </button>
 
             <button s-on:click="nextTrack" class="text-gray-500 hover:text-white transition-colors" aria-label="Next track">
@@ -50,7 +50,7 @@ function formatTime(seconds: number): string {
 
         <div class="progress-container relative w-full h-2 bg-white/20 rounded cursor-pointer group" s-on:click="onSeek" aria-label="Seek progress">
             <div 
-                class="absolute top-0 left-0 h-full bg-cyan-500 rounded transition-all duration-100"
+                class="absolute top-0 left-0 h-full bg-primary-500 rounded transition-all duration-100"
                 s-style:bind="{width: (progress * 100) + '%'}"
             ></div>
             <div 
@@ -68,12 +68,12 @@ function formatTime(seconds: number): string {
             {
                 playlist.map((track, i) => (
                     <div
-                        class="track-item relative cursor-pointer flex flex-col justify-between p-3 hover:bg-white/5 border border-transparent hover:border-cyan-500/30 transition-all group relative"
+                        class="track-item relative cursor-pointer flex flex-col justify-between p-3 hover:bg-white/5 border border-transparent hover:border-primary-500/30 transition-all group relative"
                         data-index={i}
                     >
                         <button class="flex justify-between items-center cursor-pointer w-full text-left" s-on:click="handlePlayTrack">
                             <div class="flex items-center gap-4">
-                                <span class="font-mono text-xs text-gray-600 group-hover:text-cyan-500">{`0${i + 1}`}</span>
+                                <span class="font-mono text-xs text-gray-600 group-hover:text-primary-500">{`0${i + 1}`}</span>
                                 <div class="flex flex-col items-start">
                                     <span class="font-sans text-sm font-bold text-gray-300 group-hover:text-white">
                                         {track.title}
@@ -82,7 +82,7 @@ function formatTime(seconds: number): string {
                                 </div>
                             </div>
                             <span
-                                class="font-mono text-xs text-cyan-500"
+                                class="font-mono text-xs text-primary-500"
                                 s-text={`${i} === currentTrackIndex ? (isPlaying ? "<PLAYING>" : "<PAUSED>") : "<PLAY>"`}
                             />
                         </button>

@@ -1,20 +1,10 @@
 ---
 import MusicPage from "@/components/pages/music.astro";
 import { usePageTranslation } from "@/i18n/pages";
-import { defaultLang, languages } from "@/i18n/ui";
+import { getLocaleParams } from "@/i18n/utils";
 
 export async function getStaticPaths() {
-    const paths = Object.keys(languages)
-        .filter((a) => a !== defaultLang)
-        .map((page) => {
-            return {
-                params: {
-                    locale: page,
-                },
-            };
-        });
-
-    return paths;
+    return getLocaleParams();
 }
 
 const pt = usePageTranslation(Astro.params.locale);
