@@ -17,6 +17,29 @@
     --accent-red-900: #330f0f;
 }
 
+:root {
+    --a-red-100: #FFCCCC;
+    --a-red-200: #FF9999;
+    --a-red-300: #FF4C4C;
+    --a-red-400: #E60000;
+    --a-red-500: #B30000;
+    --a-red-soft: var(--a-red-300);
+
+    --a-teal-100: #A4D8D2;
+    --a-teal-200: #65B8B0;
+    --a-teal-300: #1ABC9C;
+    --a-teal-400: #17A89E;
+    --a-teal-500: #148C8A;
+    --a-teal-soft: var(--a-teal-200);
+
+    --a-purple-100: #D1A1D5;
+    --a-purple-200: #C179C2;
+    --a-purple-300: #9B59B6;
+    --a-purple-400: #8E47A3;
+    --a-purple-500: #6F2A8D;
+    --a-purple-soft: var(--a-purple-300);
+}
+
 @font-face {
     font-family: "Tekna";
     src: url("/fonts/tekna-regular.otf") format("opentype");
@@ -53,6 +76,12 @@ h4,
 
     --font-sans: "Syncopate", sans-serif;
     --font-p: "Spline Sans Mono Variable", monospace;
+
+    --color-primary-400: #A0E3E3;
+    --color-primary-500: #68D0D0;
+    --color-primary-600: #1ABCFF;
+    --color-primary-700: #17A8D8;
+    --color-primary-800: #148C99;
 }
 
 #canvas-container {
@@ -62,6 +91,13 @@ h4,
     width: 100%;
     height: 100%;
     z-index: 1;
+}
+
+.titles {
+    color: #66a5c4;
+    /* filter: drop-shadow(0px 6px 10px #445f64); */
+    opacity: 1;
+    font-weight: 100;
 }
 
 .pointer-events-auto {

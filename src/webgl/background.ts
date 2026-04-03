@@ -4,6 +4,11 @@ import * as THREE from "three";
 class NebulaBackground {
     private audioAnalyser: AnalyserNode | null = null;
     private audioDataArray: Uint8Array = new Uint8Array();
+    private audioContext: AudioContext | null = null;
+    private mediaElement: HTMLAudioElement | null = null;
+    private audioCtx: AudioContext | null = null;
+    private audioSource: AudioBufferSourceNode | null = null
+    private gainNode: GainNode | null = null;
 
     private material: THREE.ShaderMaterial | null = null;
 
@@ -16,10 +21,6 @@ class NebulaBackground {
     private zoomCompleteEmitted = false;
     private isInitialized = false;
 
-    private audioCtx!: AudioContext;
-    private audioSource!: AudioBufferSourceNode;
-    private gainNode!: GainNode;
-
     private backgroundTexture: THREE.Texture<HTMLImageElement> | null = null;
     private textureLoader = new THREE.TextureLoader();
     private _isMounted: boolean = false;
@@ -30,8 +31,10 @@ class NebulaBackground {
 
     private lastImageLoaded: string | null = null;
 
-    public readonly MAIN_TEXTURE = "/textures/waves.png";
+    // public readonly MAIN_TEXTURE = "/textures/original.jpg";
+    public readonly MAIN_TEXTURE = "/textures/vibrant-liquid.jpg";
     public readonly OPTIONAL_TEXTURE = "/textures/abstract.jpg";
+    public readonly MUSIC_TEXTURE = "/textures/vibrant-liquid.jpg";
 
     public posterMesh: THREE.Mesh | null = null;
 
@@ -89,6 +92,11 @@ class NebulaBackground {
             },
             uImageRes1: { value: new THREE.Vector2(1, 1) },
             uImageRes2: { value: new THREE.Vector2(1, 1) },
+            uAudioLow: { value: 0.0 },
+            uAudioMid: { value: 0.0 },
+            uAudioHigh: { value: 0.0 },
+            uAudioBass: { value: 0.0 },
+            uIsMusicPage: { value: 0.0 },
         };
 
         this.setBackgroundTexture().then((texture) => {
@@ -111,6 +119,29 @@ class NebulaBackground {
             requestAnimationFrame(animate);
             if (this.audioAnalyser) {
                 this.audioAnalyser.getByteFrequencyData(this.audioDataArray as any);
+
+                const data = this.audioDataArray;
+                const bufferLength = data.length;
+
+                let low = 0, mid = 0, high = 0, bass = 0;
+                const quarter = Math.floor(bufferLength / 4);
+
+                for (let i = 0; i < quarter; i++) {
+                    bass += data[i];
+                    low += data[i + quarter];
+                    mid += data[i + quarter * 2];
+                    high += data[i + quarter * 3];
+                }
+
+                bass = bass / (quarter * 255);
+                low = low / (quarter * 255);
+                mid = mid / (quarter * 255);
+                high = high / (quarter * 255);
+
+                uniforms.uAudioBass.value += (bass - uniforms.uAudioBass.value) * 0.3;
+                uniforms.uAudioLow.value += (low - uniforms.uAudioLow.value) * 0.2;
+                uniforms.uAudioMid.value += (mid - uniforms.uAudioMid.value) * 0.15;
+                uniforms.uAudioHigh.value += (high - uniforms.uAudioHigh.value) * 0.1;
             }
 
             const elapsed = clock.getElapsedTime();
@@ -148,6 +179,15 @@ class NebulaBackground {
         this._isMounted = true;
     }
 
+    public setMusicPage(isMusic: boolean) {
+        if (this.material) {
+            this.material.uniforms.uIsMusicPage.value = isMusic ? 1.0 : 0.0;
+            // if (isMusic) {
+            //     this.transitionToTexture(this.MUSIC_TEXTURE);
+            // }
+        }
+    }
+
     private initMesh(uniforms: any) {
         const geo = new THREE.PlaneGeometry(2, 2);
 
@@ -169,6 +209,12 @@ class NebulaBackground {
                 uniform float uTime, uZoom, uOpacity;
                 uniform vec2 uMouse, uResolution;
                 uniform vec2 uImageRes1, uImageRes2;
+                
+                uniform float uAudioLow;
+                uniform float uAudioMid;
+                uniform float uAudioHigh;
+                uniform float uAudioBass;
+                uniform float uIsMusicPage;
 
                 varying vec2 vUv;
 
@@ -184,6 +230,33 @@ class NebulaBackground {
                     float s = sin(a);
                     float c = cos(a);
                     return mat2(c,-s,s,c);
+                }
+                
+                float hash(vec2 p) {
+                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+                }
+                
+                float noise(vec2 p) {
+                    vec2 i = floor(p);
+                    vec2 f = fract(p);
+                    f = f * f * (3.0 - 2.0 * f);
+                    return mix(
+                        mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                        mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
+                        f.y
+                    );
+                }
+                
+                float fbm(vec2 p) {
+                    float v = 0.0;
+                    float a = 0.5;
+                    vec2 shift = vec2(100.0);
+                    for (int i = 0; i < 4; i++) {
+                        v += a * noise(p);
+                        p = p * 2.0 + shift;
+                        a *= 0.5;
+                    }
+                    return v;
                 }
 
                 void main(){
@@ -202,6 +275,15 @@ class NebulaBackground {
                     vec2 dUv1 = uv1 + vec2(uTime * 0.05, -uTime * 0.03);
                     vec2 dUv2 = uv2 + vec2(-uTime * 0.04, uTime * 0.02);
 
+                    // Audio reactive wave distortion for music pages
+                    float waveStrength = uIsMusicPage * 0.08;
+                    float waveFreq = 8.0 + uAudioMid * 4.0;
+                    float wave = sin(vUv.y * waveFreq + uTime * 2.0) * uAudioMid * waveStrength;
+                    float wave2 = cos(vUv.x * waveFreq * 0.7 + uTime * 1.5) * uAudioLow * waveStrength;
+                    
+                    dUv1 += vec2(wave, wave2);
+                    dUv2 += vec2(wave * 0.8, wave2 * 0.8);
+
                     vec4 disp1 = texture2D(textureOne, dUv1);
                     vec4 disp2 = texture2D(textureTwo, dUv2);
                     vec4 disp = mix(disp1, disp2, textureSwap);
@@ -211,6 +293,13 @@ class NebulaBackground {
 
                     vec2 offset = (disp.rg - 0.5) * (0.04 + mouse * 0.08);
 
+                    // Extra distortion on music page based on audio
+                    float distortAmount = uIsMusicPage * (0.02 + uAudioBass * 0.06);
+                    offset += vec2(
+                        fbm(uv1 * 3.0 + uTime * 0.5) - 0.5,
+                        fbm(uv1 * 3.0 + 100.0 + uTime * 0.5) - 0.5
+                    ) * distortAmount;
+
                     uv1 += offset;
                     uv2 += offset;
 
@@ -218,6 +307,16 @@ class NebulaBackground {
                     vec4 c2 = texture2D(textureTwo, uv2);
 
                     vec4 color = mix(c1, c2, textureSwap);
+
+                    // Add glow effect based on audio on music pages
+                    if (uIsMusicPage > 0.5) {
+                        float glowIntensity = (uAudioBass * 0.3 + uAudioLow * 0.2) * uIsMusicPage;
+                        color.rgb += glowIntensity * vec3(0.0, 0.8, 1.0) * (1.0 - length(vUv - 0.5));
+                        
+                        // Pulsing color shift
+                        float pulse = sin(uTime * 3.0) * 0.5 + 0.5;
+                        color.rgb = mix(color.rgb, color.rgb * vec3(1.2, 0.9, 1.1), pulse * uAudioMid * 0.3);
+                    }
 
                     color.rgb *= 1.0 - length(vUv - 0.5) * 0.6;
 
@@ -255,6 +354,30 @@ class NebulaBackground {
             this.renderer.setSize(window.innerWidth, window.innerHeight);
             uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
         });
+    }
+
+    public connectAudio(mediaElement: HTMLAudioElement) {
+        this.mediaElement = mediaElement;
+
+        try {
+            this.audioContext = new AudioContext();
+            const source = this.audioContext.createMediaElementSource(mediaElement);
+            this.audioAnalyser = this.audioContext.createAnalyser();
+            this.audioAnalyser.fftSize = 256;
+            this.audioDataArray = new Uint8Array(this.audioAnalyser.frequencyBinCount);
+
+            source.connect(this.audioAnalyser);
+            this.audioAnalyser.connect(this.audioContext.destination);
+        } catch (e) {
+            console.warn('Audio context could not be created:', e);
+        }
+    }
+
+    public disconnectAudio() {
+        this.audioAnalyser = null;
+        this.audioDataArray = new Uint8Array();
+        this.audioContext = null;
+        this.mediaElement = null;
     }
 
     public transitionToTexture(url: string | THREE.Texture<HTMLImageElement>, duration = 1.5) {
@@ -392,11 +515,6 @@ class NebulaBackground {
            this.posterMesh = null; */
     }
 
-    public disconnectAudio() {
-        this.audioAnalyser = null;
-        this.audioDataArray = new Uint8Array();
-    }
-
     public onZoomCompleted() {
         window.dispatchEvent(new Event("zoomComplete"));
     }
@@ -406,23 +524,23 @@ class NebulaBackground {
 
         fetch("/music/background.mp3")
             .then((r) => r.arrayBuffer())
-            .then((b) => this.audioCtx.decodeAudioData(b))
+            .then((b) => this.audioCtx!.decodeAudioData(b))
             .then((buffer) => {
-                this.audioSource = this.audioCtx.createBufferSource();
-                this.audioSource.buffer = buffer;
+                this.audioSource = this.audioCtx!.createBufferSource();
+                this.audioSource!.buffer = buffer;
                 this.audioSource.loop = true;
 
-                this.gainNode = this.audioCtx.createGain();
+                this.gainNode = this.audioCtx!.createGain();
                 this.gainNode.gain.value = 0.75;
 
                 this.audioSource.connect(this.gainNode);
-                this.gainNode.connect(this.audioCtx.destination);
+                this.gainNode.connect(this.audioCtx!.destination);
 
                 document.addEventListener(
                     "mousemove",
                     () => {
-                        this.audioCtx.resume().then(() => {
-                            this.audioSource.start();
+                        this.audioCtx!.resume().then(() => {
+                            this.audioSource!.start();
                         });
                     },
                     { once: true }
@@ -433,7 +551,7 @@ class NebulaBackground {
     public fadedPauseSound(duration = 0.5): Promise<void> {
         if (!this.gainNode) return Promise.resolve();
 
-        const now = this.audioCtx.currentTime;
+        const now = this.audioCtx!.currentTime;
 
         this.gainNode.gain.cancelScheduledValues(now);
         this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
@@ -445,7 +563,7 @@ class NebulaBackground {
     public fadedResumeSound(duration = 0.5): Promise<void> {
         if (!this.gainNode) return Promise.resolve();
 
-        const now = this.audioCtx.currentTime;
+        const now = this.audioCtx!.currentTime;
 
         this.gainNode.gain.cancelScheduledValues(now);
         this.gainNode.gain.setValueAtTime(0, now);

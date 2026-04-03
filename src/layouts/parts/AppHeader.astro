@@ -9,7 +9,7 @@ const t = useTranslations(lang);
 
 const currentPath = computeCurrentLocale(Astro.url, lang);
 const isSamePath = isSameLocalePath(Astro.url, lang);
-const isHome = isSamePath('/');
+const isHome = isSamePath('/') || isSamePath('/es') || isSamePath('/pt');
 
 const menu = [
     {
@@ -33,6 +33,12 @@ const fullMenu = [
     },
     ...menu,
 ]
+
+const languages = [
+    { code: 'en', label: 'EN', flag: '🇬🇧' },
+    { code: 'es', label: 'ES', flag: '🇪🇸' },
+    { code: 'pt', label: 'PT', flag: '🇵🇹' },
+];
 ---
 
 <nav class="w-screen pointer-events-none">
@@ -42,7 +48,7 @@ const fullMenu = [
                 {menu.map(item => (
                     <Link
                         href={item.url}
-                        class="nav-link lg:text-xl text-cyan-100 hover:text-cyan-500 transition-colors duration-300"
+                        class="nav-link lg:text-xl text-primary-100 hover:text-primary-500 transition-colors duration-300"
                     >
                         {item.label}
                     </Link>
@@ -54,28 +60,52 @@ const fullMenu = [
                     {menu.map(item => (
                         <Link
                             href={item.url}
-                            class="nav-link lg:text-xl text-cyan-100 hover:text-cyan-500 transition-colors duration-300"
+                            class="nav-link lg:text-xl text-primary-100 hover:text-primary-500 transition-colors duration-300"
                         >
                             {item.label}
                         </Link>
                     ))}
                 </div>
                 <Link href="/" class="group a-logo transition-slide-down rotate-90">
-                    <Logo class={'size-14 text-cyan-400'} />
+                    <Logo class={'size-14 text-primary-400'} />
                 </Link>
-                <a href={currentPath}>
-                    <Languages class="size-6 rotate-90" />
-                </a>
+                <div class="lang-picker-wrapper relative">
+                    <button class="lang-btn flex items-center gap-2 text-primary-100 hover:text-primary-500 transition-colors" aria-label="Select language">
+                        <Languages class="size-6 rotate-90" />
+                    </button>
+                    <div class="lang-dropdown absolute top-full right-0 mt-2 py-2 bg-black/80 backdrop-blur-sm rounded-md opacity-0 invisible transition-all duration-200">
+                        {languages.map((l) => (
+                            <a 
+                                href={computeCurrentLocale(Astro.url, l.code)} 
+                                class={`block px-4 py-2 text-sm hover:text-primary-500 transition-colors ${lang === l.code ? 'text-primary-500' : 'text-primary-100'}`}
+                            >
+                                <span>{l.flag}</span> {l.label}
+                            </a>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div class="mobile-menu-left fixed top-0 left-0 z-50 flex items-center w-full justify-between px-5 py-4">
                 <div class="flex items-center gap-4">
                     <Link href="/" class="group a-logo transition-slide-down">
-                        <Logo class={'size-10 text-cyan-400'} />
+                        <Logo class={'size-10 text-primary-400'} />
                     </Link>
-                    <a href={currentPath}>
-                        <Languages class="size-6 text-slate-200/50" />
-                    </a>
+                    <div class="lang-picker-wrapper relative">
+                        <button class="lang-btn flex items-center text-slate-200/50 hover:text-primary-500 transition-colors" aria-label="Select language">
+                            <Languages class="size-6" />
+                        </button>
+                        <div class="lang-dropdown absolute top-full left-0 mt-2 py-2 bg-black/80 backdrop-blur-sm rounded-md opacity-0 invisible transition-all duration-200">
+                            {languages.map((l) => (
+                                <a 
+                                    href={computeCurrentLocale(Astro.url, l.code)} 
+                                    class={`block px-4 py-2 text-sm hover:text-primary-500 transition-colors ${lang === l.code ? 'text-primary-500' : 'text-slate-200'}`}
+                                >
+                                    <span>{l.flag}</span> {l.label}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
                 </div>
                 <button id="hamburger-btn" class="hamburger-btn mobile-only flex flex-col gap-1.5 justify-center items-end group pointer" aria-label="Menu">
                     <div class="burger-line w-8 bg-slate-200 transition-all duration-300"></div>
@@ -89,7 +119,7 @@ const fullMenu = [
                         return (
                              <Link
                                 href={item.url}
-                                class={`mobile-nav-link text-2xl tracking-widest transition-all duration-300 text-cyan-100`}
+                                class={`mobile-nav-link text-2xl tracking-widest transition-all duration-300 text-primary-100`}
                                 style={`--x-delay: ${index * 125}ms`}
                             >
                                 {item.label}
@@ -151,6 +181,25 @@ const fullMenu = [
                 mobileMenu && mobileMenu.classList.remove('is-scrolling');
             }
         });
+
+        document.querySelectorAll('.lang-picker-wrapper').forEach(wrapper => {
+            const btn = wrapper.querySelector('.lang-btn');
+            const dropdown = wrapper.querySelector('.lang-dropdown');
+            
+            btn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown?.classList.toggle('opacity-100');
+                dropdown?.classList.toggle('visible');
+                dropdown?.classList.toggle('invisible');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.lang-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('opacity-100', 'visible');
+                dropdown.classList.add('invisible');
+            });
+        });
     })
 </script>
 
@@ -178,7 +227,7 @@ const fullMenu = [
         text-transform: uppercase;
     }
     .nav-link[aria-current='page'] {
-        color: tomato;
+        color: var(--a-red-soft);
     }
     .app-nav-items .nav-link {
         letter-spacing: 0.25em;
@@ -327,5 +376,17 @@ const fullMenu = [
         .mobile-only, .mobile-menu-left {
             display: none;
         }
+
+        .lang-picker-wrapper {
+            position: relative;
+        }
+        .lang-dropdown {
+            min-width: 120px;
+            right: 0;
+        }
+    }
+
+    .lang-dropdown {
+        min-width: 100px;
     }
 </style>

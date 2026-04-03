@@ -45,8 +45,8 @@ const tracks = [
     <section
         class="w-full min-h-screen flex flex-col items-center justify-center pointer-events-none pt-24"
         id="music-root"
+        data-galaxy="music"
     >
-        <div class="music-title" s-text="track.title"></div>
         <div class="z-10 text-center pointer-events-auto mix-blend-difference w-full max-w-2xl px-6" data-ws-fade>
             <SoundPLayer playlist={tracks} />
         </div>
@@ -71,12 +71,16 @@ const tracks = [
         isPlaying: false,
         currentTrackIndex: 0,
         progress: 0,
+        currentTime: 0,
+        duration: 0,
         playlist: JSON.parse(document.getElementById('music-data')?.textContent || '[]'),
 
         playTrack(index: number) {
             if (index !== this.currentTrackIndex) {
                 this.currentTrackIndex = index;
                 this.progress = 0;
+                this.currentTime = 0;
+                this.duration = 0;
             }
             this.isPlaying = true;
 
@@ -128,6 +132,13 @@ const tracks = [
 
         get track() {
             return this.playlist[this.currentTrackIndex];
+        },
+        
+        formatTime(seconds: number): string {
+            if (!seconds || !isFinite(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
     });
 
@@ -143,6 +154,8 @@ const tracks = [
 
         window.AppEvent.listen('audio:progress', (data: any) => {
             state.progress = data.progress;
+            state.currentTime = data.currentTime;
+            state.duration = data.duration;
         });
 
         if (root && state) {

@@ -1,0 +1,90 @@
+---
+---
+
+<div class="mini-player fixed top-4 left-4 z-50 flex items-center gap-3 px-3 py-2 opacity-0 transition-opacity duration-300" id="mini-player">
+    <button 
+        id="mini-play-btn"
+        class="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+        aria-label="Play/Pause"
+    >
+        <div class="play-icon w-0 h-0 border-t-6 border-t-transparent border-l-10 border-l-primary border-b-6 border-b-transparent"></div>
+        <div class="pause-icon hidden w-3 h-4 border-l-2 border-r-2 border-primary-500"></div>
+    </button>
+    
+    <div class="mini-progress w-20 h-1 bg-white/20 rounded cursor-pointer overflow-hidden" id="mini-progress">
+        <div class="mini-progress-bar h-full bg-primary-500 transition-all duration-100" style="width: 0%"></div>
+    </div>
+    
+    <div class="mini-track-info hidden flex-col">
+        <span class="font-mono text-[10px] text-primary-500 truncate max-w-24" id="mini-track-title">-</span>
+    </div>
+</div>
+
+<script>
+    import { inject } from '@packages/z-state';
+
+    document.addEventListener('astro:page-load', () => {
+        const miniPlayer = document.getElementById('mini-player');
+        const playBtn = document.getElementById('mini-play-btn');
+        const progressBar = document.getElementById('mini-progress');
+        const progressFill = miniPlayer?.querySelector('.mini-progress-bar') as HTMLElement;
+        const trackTitle = document.getElementById('mini-track-title');
+        
+        const playIcon = playBtn?.querySelector('.play-icon') as HTMLElement;
+        const pauseIcon = playBtn?.querySelector('.pause-icon') as HTMLElement;
+        
+        const state = inject<Record<string, any>>('audioState');
+        
+        function updateMiniPlayer() {
+            if (!state || !miniPlayer) return;
+            
+            if (state.isPlaying) {
+                miniPlayer.classList.add('opacity-100');
+                miniPlayer.classList.remove('opacity-0');
+                playIcon?.classList.add('hidden');
+                pauseIcon?.classList.remove('hidden');
+            } else {
+                playIcon?.classList.remove('hidden');
+                pauseIcon?.classList.add('hidden');
+            }
+            
+            if (progressFill) {
+                progressFill.style.width = `${(state.progress || 0) * 100}%`;
+            }
+            
+            if (trackTitle && state.track) {
+                trackTitle.textContent = state.track.title || '-';
+            }
+        }
+        
+        if (state) {
+            updateMiniPlayer();
+            
+            const checkInterval = setInterval(() => {
+                updateMiniPlayer();
+            }, 200);
+            
+            window.addEventListener('beforeunload', () => clearInterval(checkInterval));
+        }
+        
+        playBtn?.addEventListener('click', () => {
+            if (state) {
+                state.togglePlay();
+                setTimeout(updateMiniPlayer, 50);
+            }
+        });
+        
+        progressBar?.addEventListener('click', (e) => {
+            if (state) {
+                const rect = progressBar.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentage = clickX / rect.width;
+                window.AppEvent.dispatch('audio:seek', percentage);
+            }
+        });
+        
+        window.AppEvent.listen('audio:play', () => {
+            setTimeout(updateMiniPlayer, 100);
+        });
+    });
+</script>

@@ -3,6 +3,7 @@ import '@fontsource-variable/spline-sans-mono';
 import '@/assets/css/main.css';
 import AppHeader from './parts/AppHeader.astro';
 import AppFooter from './parts/AppFooter.astro';
+import MiniPlayer from '@/components/MiniPlayer.astro';
 import { ClientRouter } from 'astro:transitions';
 import { getLangFromUrl } from '@/i18n/utils';
 
@@ -131,8 +132,9 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
         <ClientRouter />
     </head>
 
-    <body class={`${pageClass}`} data-page={page}>
+    <body class={`${pageClass}`} data-page={page} data-galaxy={page}>
         <AppHeader />
+        <MiniPlayer />
         <main class="relative z-10 w-full min-h-screen flex flex-col" transition:name="view">
             <slot />
         </main>
@@ -154,6 +156,16 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
                 }, timeout);
 
                 const page = document.body.getAttribute('data-galaxy') || 'home';
+                const isMusicPage = page === 'music';
+                
+                galaxy.setMusicPage(isMusicPage);
+
+                if (isMusicPage) {
+                    const audioPlayer = document.getElementById('audio-player') as HTMLAudioElement;
+                    if (audioPlayer) {
+                        galaxy.connectAudio(audioPlayer);
+                    }
+                }
 
                 if (page == 'home') {
                     if (galaxy.isLastImageLoaded(galaxy.MAIN_TEXTURE)) {
@@ -163,10 +175,6 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
                         galaxy.zoomReset();
                     }
                 } else {
-                    /*    if (!galaxy.isLastImageLoaded(galaxy.OPTIONAL_TEXTURE)) {
-                        galaxy.transitionToTexture(galaxy.OPTIONAL_TEXTURE);
-                    }
- */
                     if (Math.random() > 0.5) {
                         galaxy.zoomOut(0.65);
                     } else {
@@ -200,7 +208,6 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
 
             window.audio = audioPlayer;
             window.AppEvent.listen('audio:play', ({ src, index, track }: any) => {
-                galaxy.transitionToTexture(track.poster);
                 galaxy.zoomReset();
                 galaxy.fadedPauseSound().then(() => {
                     audioPlayer.src = src;
@@ -224,9 +231,9 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
             window.AppEvent.listen('audio:pause', () => {
                 audioPlayer.pause();
                 galaxy.fadedResumeSound();
-                galaxy.restoreBackgroundTexture();
+                // galaxy.restoreBackgroundTexture();
 
-                galaxy.disposePoster();
+                // galaxy.disposePoster();
             });
 
             window.AppEvent.listen('audio:seek', (percentage: number) => {
