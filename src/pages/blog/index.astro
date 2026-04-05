@@ -1,0 +1,21 @@
+---
+import BlogPage from "@/components/pages/blog.astro";
+import { usePageTranslation } from "@/i18n/pages";
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+import { getCollection } from "astro:content";
+
+const lang = getLangFromUrl(Astro.url);
+const pt = usePageTranslation(lang);
+
+const posts = (await getCollection("blog")).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BlogPage
+    seo={{
+        title: "Blog | Alex Zweiter",
+        description: "Thoughts on software engineering, low-level systems, and technology.",
+    }}
+    posts={posts}
+/>

@@ -70,6 +70,13 @@ export const pages = {
             "title": "Música",
             "description": "Exploro el sonido a través de texturas electrónicas, experimentación rítmica y narrativa emocional."
         },
+        "blog": {
+            "seo": {
+                "title": "Blog | Alex Zweiter",
+                "description": "Reflexiones sobre ingeniería de software, sistemas de bajo nivel y tecnología."
+            },
+            "title": "Blog"
+        },
         "works": {
             "seo": {
                 "title": "Proyectos | Alex Zweiter",
@@ -195,6 +202,13 @@ export const pages = {
             },
             "title": "Music",
             "description": "I explore sound through electronic textures, rhythmic experimentation, and emotional storytelling."
+        },
+        "blog": {
+            "seo": {
+                "title": "Blog | Alex Zweiter",
+                "description": "Thoughts on software engineering, low-level systems, and technology."
+            },
+            "title": "Blog"
         },
         "works": {
             "seo": {
@@ -322,6 +336,13 @@ export const pages = {
             "title": "Música",
             "description": "Exploro o som através de texturas eletrônicas, experimentação rítmica e narrativa emocional."
         },
+        "blog": {
+            "seo": {
+                "title": "Blog | Alex Zweiter",
+                "description": "Reflexões sobre engenharia de software, sistemas de baixo nível e tecnologia."
+            },
+            "title": "Blog"
+        },
         "works": {
             "seo": {
                 "title": "Projetos | Alex Zweiter",
@@ -379,41 +400,55 @@ export const pages = {
     }
 };
 
-export const common = {
-    socials: {
-        github: "https://github.com/zsweiter",
-        linkedin: "https://www.linkedin.com/in/alex-segundo",
-        twitter: "https://x.com/asegundo442",
-        instagram: "https://www.instagram.com/alexsegundoll",
-        soundcloud: "https://soundcloud.com/alex-zweiter",
-        email: "zsweiter@gmail.com",
-    },
+const resolveKey = (lang: string, obj: any, path: string, type: "string" | "array"): any => {
+    const keys = path.split(".");
+
+    let current: any = (obj as any)[lang];
+    if (!current) {
+        console.warn(`Language not found: ${lang} for ${path}`);
+        return type === "string" ? (path as any) : [];
+    }
+
+    for (const k of keys) {
+        if (current && typeof current === "object" && k in current) {
+            current = current[k];
+        } else {
+            return type === "string" ? ("" as any) : [];
+        }
+    }
+
+    if (type === "array") {
+        if (Array.isArray(current)) return current;
+        if (current && typeof current === "object") return Object.values(current);
+        return [];
+    }
+
+    return typeof current === "string" ? (current as any) : (String(current) as any);
 }
+
 
 export const usePageTranslation = (lang: string) => {
     return (key: string, type: "string" | "array" = "string"): any => {
-        const keys = key.split(".");
-
-        let current: any = (pages as any)[lang];
-        if (!current) {
-            console.warn(`Language not found: ${lang} for ${key}`);
-            return type === "string" ? (key as any) : [];
-        }
-
-        for (const k of keys) {
-            if (current && typeof current === "object" && k in current) {
-                current = current[k];
-            } else {
-                return type === "string" ? ("" as any) : [];
-            }
-        }
-
-        if (type === "array") {
-            if (Array.isArray(current)) return current;
-            if (current && typeof current === "object") return Object.values(current);
-            return [];
-        }
-
-        return typeof current === "string" ? (current as any) : (String(current) as any);
+        return resolveKey(lang, pages, key, type);
     };
 };
+
+
+export const common = {
+    es: {
+        resume: "Descargar CV"
+    },
+    en: {
+        resume: "Download Resume"
+    },
+    pt: {
+        resume: "Baixar CV"
+    }
+}
+
+export const useCommonTranslation = (lang: string) => {
+    return (key: string, type: "string" | "array" = "string"): any => {
+        return resolveKey(lang, common, key, type);
+    };
+}
+
