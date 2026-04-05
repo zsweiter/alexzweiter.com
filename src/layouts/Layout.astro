@@ -157,7 +157,6 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
 
                 const page = document.body.getAttribute('data-galaxy') || 'home';
                 const isMusicPage = page === 'music';
-                
                 galaxy.setMusicPage(isMusicPage);
 
                 if (isMusicPage) {

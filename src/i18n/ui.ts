@@ -12,6 +12,7 @@ export const ui = {
         "nav.music": "Music",
         "nav.works": "Works",
         "nav.home": "Home",
+        "nav.blog": "Blog",
 
         "web.title": "Alex Zweiter | Full Stack Engineer - Music Producer",
         "web.description": "Welcome to my personal website where I showcase my work as a full stack engineer and music producer.",
@@ -22,6 +23,7 @@ export const ui = {
         "nav.music": "Música",
         "nav.works": "Proyectos",
         "nav.home": "Inicio",
+        "nav.blog": "Blog",
 
         "web.title": "Alex Zweiter | Ingeniero Full Stack - Productor de Música",
         "web.description": "Bienvenido a mi sitio web personal donde muestro mi trabajo como ingeniero full stack y productor de música.",
@@ -32,6 +34,7 @@ export const ui = {
         "nav.music": "Música",
         "nav.works": "Projetos",
         "nav.home": "Home",
+        "nav.blog": "Blog",
 
         "web.title": "Alex Zweiter | Engenheiro Full Stack - Produtor Musical",
         "web.description": "Bem-vindo ao meu site pessoal onde apresento meu trabalho como engenheiro full stack e produtor musical.",
