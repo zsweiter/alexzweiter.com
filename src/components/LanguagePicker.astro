@@ -1,15 +1,18 @@
 ---
 import { computeCurrentLocale } from '@/i18n/utils';
+import { getLangFromUrl } from '@/i18n/utils';
 import Languages from '@/components/icons/Languages.astro';
 
 const url = Astro.url;
+const currentLang = getLangFromUrl(url);
 const languages = [
     { code: 'en', label: 'English', iso: 'EN', icon: '🇬🇧', path: computeCurrentLocale(url, 'en') },
     { code: 'es', label: 'Español', iso: 'ES', icon: '🇪🇸', path: computeCurrentLocale(url, 'es') },
     { code: 'pt', label: 'Português', iso: 'PT', icon: '🇵🇹', path: computeCurrentLocale(url, 'pt') }
 ];
 
-const { current = 'en', onChange, class: className } = Astro.props;
+const { onChange, class: className } = Astro.props;
+const current = currentLang;
 ---
 
 <!-- <div class="relative inline-block text-left">
@@ -50,14 +53,13 @@ const { current = 'en', onChange, class: className } = Astro.props;
         }
     </ul>
 </div> -->
-<div class:list={['relative inline-block text-left', className]}>
+<div class:list={['lang-picker-wrapper relative inline-block text-left', className]}>
     <button
-        class="cursor-pointer min-w-[4ch]"
+        class="lang-btn cursor-pointer min-w-[4ch]"
         type="button"
         aria-haspopup="listbox"
         aria-expanded="false"
         id="language-picker-button"
-        onclick="document.getElementById('language-picker-list').classList.toggle('hidden')"
     >
         <span class="flex items-center gap-2 flex-col">
             <Languages class="size-4" />
@@ -67,7 +69,7 @@ const { current = 'en', onChange, class: className } = Astro.props;
 
     <ul
         id="language-picker-list"
-        class="hidden absolute mt-1 w-full bg-slate-200/50 border border-primary-400 rounded-md shadow-lg z-10"
+        class="lang-dropdown absolute mt-1 w-full bg-slate-200/50 border border-primary-400 rounded-md shadow-lg z-10 opacity-0 invisible transition-all duration-200"
         role="listbox"
         aria-labelledby="language-picker-button"
     >
@@ -75,9 +77,13 @@ const { current = 'en', onChange, class: className } = Astro.props;
             languages.map(lang => (
                 <li
                     role="option"
-                    class="cursor-pointer flex items-center gap-2 p-2 hover:bg-primary-50 hover:text-primary-600 transition"
+                    aria-selected={lang.code === current}
+                    class:list={[
+                        'cursor-pointer flex items-center gap-2 p-2 hover:bg-primary-50 hover:text-primary-600 transition',
+                        lang.code === current && 'bg-primary-100/50 text-primary-700'
+                    ]}
                 >
-                    <a href={lang.path} title={lang.label}>
+                    <a href={lang.path} title={lang.label} class:list={[lang.code === current && 'font-semibold']}>
                         {lang.icon}
                     </a>
                 </li>
@@ -85,3 +91,14 @@ const { current = 'en', onChange, class: className } = Astro.props;
         }
     </ul>
 </div>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const list = document.getElementById('language-picker-list');
+        const btn = document.getElementById('language-picker-button');
+        btn?.addEventListener('click', () => {
+            list?.classList.toggle('opacity-0');
+            list?.classList.toggle('visible');
+        });
+    });
+</script>

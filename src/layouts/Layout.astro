@@ -6,19 +6,38 @@ import AppFooter from './parts/AppFooter.astro';
 import MainScripts from './parts/MainScripts.astro';
 import MiniPlayer from '@/components/MiniPlayer.astro';
 import { ClientRouter } from 'astro:transitions';
-import { getLangFromUrl } from '@/i18n/utils';
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
 
 interface Props {
     title: string;
     description: string;
+    image?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, image = '/og-image.png' } = Astro.props;
 const { pathname } = Astro.url;
 const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 const pageClass = pathname === '/' ? 'page-home' : `page-${pathname.replace(/\//g, '').toLowerCase()}`;
 const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase();
+
+const canonicalUrl = new URL(pathname, Astro.site).href;
+const ogLocale = lang === 'pt' ? 'pt_BR' : lang === 'es' ? 'es_ES' : 'en_US';
+
+const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Alex Zweiter',
+    url: Astro.site?.href || 'https://alexzweiter.com',
+    jobTitle: 'Full Stack Engineer',
+    description: description,
+    sameAs: [
+        'https://github.com/alexzweiter',
+        'https://linkedin.com/in/alexzweiter',
+        'https://soundcloud.com/alexzweiter'
+    ]
+};
 ---
 
 <!doctype html>
@@ -28,6 +47,29 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="author" content="Alex Zweiter" />
+        <meta name="robots" content="index, follow" />
+        <meta name="theme-color" content="#0f0f0f" />
+
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(image, Astro.site).href} />
+        <meta property="og:locale" content={ogLocale} />
+        <meta property="og:site_name" content="Alex Zweiter" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={new URL(image, Astro.site).href} />
+        <meta name="twitter:creator" content="@alexzweiter" />
+
+        <!-- JSON-LD -->
+        <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
         <title>{title}</title>
         <MainScripts />
@@ -51,6 +93,8 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
         <script>
             import { galaxy } from '@/webgl/background';
 
+            let previousPage: any = null;
+
             document.addEventListener('astro:page-load', a => {
                 const timeout = window.loaded ? 500 : 1000;
                 setTimeout(() => {
@@ -68,21 +112,21 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
                     }
                 }
 
-                if (page == 'home') {
-                    if (galaxy.isLastImageLoaded(galaxy.MAIN_TEXTURE)) {
+                if (page === 'home') {
+                    if (previousPage && previousPage !== 'home') {
+                        // galaxy.restoreFromDisperse(1.2);
+                    } else if (galaxy.isLastImageLoaded(galaxy.MAIN_TEXTURE)) {
                         galaxy.reinit();
                     }
-                    // else {
-                    //     galaxy.restoreBackgroundTexture();
-                    //     galaxy.zoomReset();
-                    // }
                 } else {
-                    // if (Math.random() > 0.5) {
-                    //     galaxy.zoomOut(0.65);
+                    // if (previousPage === 'home' || previousPage === null) {
+                    //     galaxy.disperseTexture(1.0);
                     // } else {
-                    //     galaxy.zoomIn();
+                    //     galaxy.disperseTexture(0.8);
                     // }
                 }
+
+                previousPage = page;
 
                 document.querySelectorAll('[data-ws-staggered]').forEach(item => {
                     Array.from(item.children).forEach((a, index) => {

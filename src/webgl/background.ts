@@ -58,6 +58,7 @@ export class NebulaBackground {
             uOpacity: { value: 0 },
             uZoom: { value: 0.05 },
             uAudio: { value: 0 },
+            uWave: { value: 0.0 },
             textureOne: { value: null as THREE.Texture | null },
             textureTwo: { value: null as THREE.Texture | null },
             textureSwap: { value: 0.0 }, // 0.0 = tex1, 1.0 = tex2
@@ -172,6 +173,7 @@ export class NebulaBackground {
                 uniform float uOpacity;
                 uniform float uZoom;
                 uniform float uAudio;
+                uniform float uWave;
 
                 uniform vec2 uMouse;
                 uniform vec2 uResolution;
@@ -218,7 +220,14 @@ export class NebulaBackground {
                     float mouseGlow = smoothstep(0.4, 0.0, dist);
 
                     vec2 offset = (disp.rg - 0.5) * (0.04 + mouseGlow * 0.08);
-                    offset += uAudio * 0.1; // Reactividad al beat
+                    offset += uAudio * 0.1;
+
+                    // Wave distortion effect
+                    float waveStrength = uWave * 0.15;
+                    vec2 center = vec2(0.5, 0.5);
+                    float distFromCenter = length(vUv - center);
+                    float wave = sin(distFromCenter * 20.0 - uTime * 3.0) * waveStrength;
+                    offset += vec2(wave, wave * 0.5);
 
                     uv1 += offset;
                     uv2 += offset;
@@ -229,8 +238,8 @@ export class NebulaBackground {
 
                     float noise = sin((vUv.x + offset.x) * 10.0 + uTime) * sin((vUv.y + offset.y) * 10.0);
                     base.rgb += noise * 0.05;
-                    base.rgb += mouseGlow * 0.15; // Luz en el cursor
-                    base.rgb *= 1.0 - length(vUv - 0.5) * 0.7; // Viñeta oscura exterior
+                    base.rgb += mouseGlow * 0.15;
+                    base.rgb *= 1.0 - length(vUv - 0.5) * 0.7;
 
                     gl_FragColor = vec4(base.rgb, uOpacity);
                 }
@@ -324,6 +333,125 @@ export class NebulaBackground {
 
         this.renderer.render(this.scene, this.camera);
     };
+
+    public zoomIn(duration = 1.2, targetZoom = 1.1) {
+        if (!this.material) return;
+        
+        this.zoomCompleteEmitted = false;
+        this.zoomTarget = targetZoom;
+        this.zoomSpeed = 0.04;
+
+        setTimeout(() => {
+            this.zoomTarget = 1.0;
+            this.zoomSpeed = 0.02;
+        }, duration * 700);
+    }
+
+    public zoomOut(duration = 1.2, targetZoom = 0.65) {
+        if (!this.material) return;
+        
+        this.zoomCompleteEmitted = false;
+        this.zoomTarget = targetZoom;
+        this.zoomSpeed = 0.03;
+    }
+
+    public async disperseTexture(duration = 1.5) {
+        if (!this.material || this.isSwapping) return;
+        
+        this.isSwapping = true;
+        const uniforms = this.material.uniforms;
+        
+        const startZoom = uniforms.uZoom.value;
+        const startOpacity = uniforms.uOpacity.value;
+        const startWave = uniforms.uWave.value;
+        
+        const startTime = performance.now();
+        
+        const animateDisperse = (now: number) => {
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / (duration * 1000), 1.0);
+            
+            const easeInExpo = t === 0 ? 0 : Math.pow(2, 10 * t - 10);
+            
+            uniforms.uZoom.value = startZoom + (0.5 - startZoom) * easeInExpo;
+            uniforms.uOpacity.value = startOpacity + (0.3 - startOpacity) * easeInExpo;
+            uniforms.uWave.value = startWave + (1.0 - startWave) * easeInExpo;
+            
+            if (t < 1.0) {
+                requestAnimationFrame(animateDisperse);
+            } else {
+                this.isSwapping = false;
+            }
+        };
+        
+        requestAnimationFrame(animateDisperse);
+    }
+
+    public async restoreFromDisperse(duration = 1.5) {
+        if (!this.material) return;
+        
+        const uniforms = this.material.uniforms;
+        const startZoom = uniforms.uZoom.value;
+        const startOpacity = uniforms.uOpacity.value;
+        const startWave = uniforms.uWave.value;
+        
+        this.zoomCompleteEmitted = false;
+        
+        const startTime = performance.now();
+        
+        const animateRestore = (now: number) => {
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / (duration * 1000), 1.0);
+            
+            const easeOutExpo = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+            
+            uniforms.uZoom.value = startZoom + (1.1 - startZoom) * easeOutExpo;
+            uniforms.uOpacity.value = startOpacity + (1.0 - startOpacity) * easeOutExpo;
+            uniforms.uWave.value = startWave + (0.0 - startWave) * easeOutExpo;
+            
+            if (t < 1.0) {
+                requestAnimationFrame(animateRestore);
+            } else {
+                setTimeout(() => {
+                    this.zoomTarget = 1.0;
+                    this.zoomSpeed = 0.02;
+                    this.zoomCompleteEmitted = false;
+                }, 500);
+            }
+        };
+        
+        requestAnimationFrame(animateRestore);
+    }
+
+    public zoomReset(duration = 1.5) {
+        if (!this.material) return;
+        
+        this.zoomCompleteEmitted = false;
+        
+        const startZoom = this.material.uniforms.uZoom.value;
+        const startTime = performance.now();
+        
+        const animateZoomReset = (now: number) => {
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / (duration * 1000), 1.0);
+            
+            const easeOutExpo = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+            const easedZoom = startZoom + (0.05 - startZoom) * easeOutExpo;
+            
+            this.material!.uniforms.uZoom.value = easedZoom;
+            this.zoomTarget = 1.0;
+            this.zoomSpeed = 0.02;
+
+            if (t < 1.0) {
+                requestAnimationFrame(animateZoomReset);
+            } else {
+                this.zoomCompleteEmitted = false;
+                this.zoomIn(1.0, 1.1);
+            }
+        };
+
+        requestAnimationFrame(animateZoomReset);
+    }
 
     public playIntro() {
         this.material!.uniforms.uOpacity.value = 0;

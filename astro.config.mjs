@@ -3,6 +3,7 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+    site: 'https://alexzweiter.com',
     devToolbar: {
         enabled: false,
     },
