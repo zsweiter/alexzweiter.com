@@ -17,14 +17,27 @@ export function useTranslations(locale: Locale) {
 
 export const useLocalePath = (locale: Locale) => {
     return (path: string) => {
-        const rawPath = path.replace(/\/$/, ""); // Remove trailing slash
+        const rawPath = path !== '/' ? path.replace(/\/$/, "") : '/'; // Remove trailing slash
         if (locale === defaultLang) return rawPath;
-        return `/${locale}${rawPath}`;
+        return `/${locale}${rawPath}`.replace(/\/$/, "");
     };
 };
 
+const stripLocale = (pathname: string) => {
+    const segments = pathname.split('/');
+    const first = segments[1];
+
+    if (first in languages) {
+        return '/' + segments.slice(2).join('/');
+    }
+
+    return pathname;
+}
+
 export const computeCurrentLocale = (path: URL, lang: string) => {
-    return useLocalePath(lang as any)(path.pathname).replace(/\/$/, "");
+    const pathname = stripLocale(path.pathname);
+
+    return useLocalePath(lang as any)(pathname).replace(/\/$/, "");
 };
 
 export const isSameLocalePath = (url: URL, lang: string) => {

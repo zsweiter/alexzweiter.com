@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alex Segundo Llaguento - CV</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-700 leading-relaxed">
+    <div class="print:hidden">
+        <button onclick="window.print()">Download</button>
+    </div>
+    <main class="max-w-[820px] mx-auto bg-white p-10 print:p-0 print:max-w-full">
+
+        <header class="flex justify-between items-start mb-10">
+            <div>
+                <h1 class="text-4xl font-extrabold text-slate-900 leading-tight">
+                    Alex Segundo<br />Llaguento
+                </h1>
+                <p class="text-lg font-medium text-amber-600 mt-2">
+                    Full Stack Developer
+                </p>
+            </div>
+
+            <div class="text-sm text-right space-y-1">
+                <p class="text-slate-500">San Luis, Lima, Perú</p>
+                <p><a href="mailto:asegundo442@gmail.com"
+                        class="text-blue-600 hover:underline">asegundo442@gmail.com</a></p>
+                <p class="text-slate-500">+51 912 891 170</p>
+                <p><a href="https://alexzweiter.com" class="text-blue-600 hover:underline">alexzweiter.com</a></p>
+                <p><a href="https://github.com/zsweiter" class="text-blue-600 hover:underline">Github</a></p>
+            </div>
+        </header>
+
+        <section class="mb-10">
+            <h2 class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">
+                Resumen
+            </h2>
+            <p class="text-[15px] text-slate-600 text-justify">
+                Soy un desarrollador apasionado por construir soluciones escalables que resuelven problemas reales. En
+                mis más de 4 años de experiencia, me he especializado en migrar arquitecturas legacy a microservicios y
+                en diseñar agentes de IA que no solo conversan, sino que ejecutan acciones para optimizar el negocio. Mi
+                enfoque es simple: transformar ideas complejas en productos digitales rápidos, seguros e impactantes.
+            </p>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-5">
+                Experiencia Profesional
+            </h2>
+
+            <div class="mb-8">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-base font-semibold text-slate-900">Digevo</h3>
+                    <span class="text-xs text-slate-400">Santiago de Chile, Chile | Dic 2022 — Dic 2025</span>
+                </div>
+
+                <p class="text-sm italic text-slate-500 mb-3">Full Stack Developer</p>
+
+                <ul class="list-disc ml-5 space-y-2 text-[14.5px]">
+                    <li>
+                        <strong>Agente Conversacional Anto:</strong> Diseñé e implementé <strong>Anto</strong>, un
+                        Agente de IA conversacional especializado en recomendación nutricional para Izzilife, logrando
+                        personalización activa de suplementos.
+                    </li>
+                    <li>
+                        <strong>Plataforma Central Izzimed:</strong> Desarrollé el MVP y backoffice administrativo
+                        inicialmente en WordPress y lideré la migración completa hacia una arquitectura moderna con
+                        <strong>Golang</strong> y <strong>Vue.js</strong>, mejorando rendimiento y escalabilidad.
+                    </li>
+                    <li>
+                        <strong>Agente de IA Multicanal:</strong> Implementé un agente integrado con WhatsApp y web que
+                        automatiza procesos y ejecuta acciones directamente sobre la plataforma.
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-base font-semibold text-slate-900">AMG Alarcon Management Group</h3>
+                    <span class="text-xs text-slate-400">Lima, Perú | Sept 2021 — Oct 2022</span>
+                </div>
+
+                <p class="text-sm italic text-slate-500 mb-3">Full Stack Developer</p>
+
+                <ul class="list-disc ml-5 space-y-2 text-[14.5px]">
+                    <li>
+                        <strong>Smart Rooster:</strong> Sistema de administración de galpones desarrollado con
+                        <strong>Laravel</strong> y <strong>Vue.js</strong>, integrando lógica mediante procedimientos
+                        almacenados en MySQL y mejorando la toma de decisiones operativas.
+                    </li>
+                    <li>
+                        <strong>eCommerce a Medida:</strong> Desarrollo de plugins personalizados, APIs internas y
+                        frontends modernos (Vue.js, Nuxt.js) optimizando flujos de negocio y experiencia del usuario.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-4">
+                Competencias Técnicas
+            </h2>
+
+            <div class="space-y-2 text-[14.5px]">
+                <div class="grid grid-cols-[130px_1fr] gap-4">
+                    <span class="font-semibold text-slate-900">Lenguajes</span>
+                    <span>Golang, Rust, Node.js, TypeScript, Python, PHP</span>
+                </div>
+
+                <div class="grid grid-cols-[130px_1fr] gap-4">
+                    <span class="font-semibold text-slate-900">Frameworks</span>
+                    <span>Vue.js, React, Svelte, Astro, TailwindCSS, NestJS</span>
+                </div>
+
+                <div class="grid grid-cols-[130px_1fr] gap-4">
+                    <span class="font-semibold text-slate-900">Cloud / DB</span>
+                    <span>AWS, GCP, Azure, Serverless, Azure Functions, Nginx, MySQL, PostgreSQL, MongoDB</span>
+                </div>
+
+                <div class="grid grid-cols-[130px_1fr] gap-4">
+                    <span class="font-semibold text-slate-900">AI / ML</span>
+                    <span>Computer Vision, Integraciones de IA</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 gap-10 mt-12">
+
+            <div>
+                <h2 class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">
+                    Educación
+                </h2>
+
+                <div class="text-[14.5px] space-y-4">
+                    <div>
+                        <div class="flex justify-between font-semibold text-slate-900">
+                            <span>Autodidacta</span>
+                            <span class="text-xs text-slate-400">Oct 2019 — Presente</span>
+                        </div>
+                        <p class="text-slate-600">Formación intensiva en desarrollo Fullstack.</p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between font-semibold text-slate-900">
+                            <span>Universidad Continental</span>
+                            <span class="text-xs text-slate-400">2019</span>
+                        </div>
+                        <p class="text-slate-600">Ingeniería en Sistemas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">
+                    Idiomas
+                </h2>
+
+                <div class="text-[14.5px] space-y-2">
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-slate-900">Español</span>
+                        <span class="text-slate-500 italic">Nativo</span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-slate-900">Inglés</span>
+                        <span class="text-slate-500 italic">Intermedio (Lectura técnica)</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+</body>
+
+</html>

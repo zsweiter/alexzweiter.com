@@ -137,7 +137,6 @@ const setVal = (scope: any, path: string, val: any) => {
     t[ps[ps.length - 1]] = val;
 };
 
-// === TRANSICIONES ===
 const transition = (el: any, show: boolean, done: () => void) => {
     const name = attr(el, "transition") || "v";
     if (!has(el, "transition")) {
@@ -167,14 +166,12 @@ const transition = (el: any, show: boolean, done: () => void) => {
     el.addEventListener("transitionend", end, { once: true });
 };
 
-// === DIRECTIVAS ===
 const dirs = {
     text: (el: any, v: any) => (el.textContent = String(v ?? "")),
     html: (el: any, v: any) => (el.innerHTML = String(v ?? "")),
     show: (el: any, v: any) => transition(el, !!v, () => { }),
 
     model: (el: any, path: string, scope: any) => {
-        // Actualizar el input desde el estado
         effect(() => {
             const v = resolve(scope, path);
             if (el.type === "checkbox") {
@@ -184,7 +181,6 @@ const dirs = {
             }
         });
 
-        // Actualizar el estado desde el input
         if (!el._zBound) {
             el._zBound = 1;
             el.addEventListener("input", () => {
@@ -226,11 +222,9 @@ const dirs = {
     },
 };
 
-// === HYDRATE ===
 export const hydrate = (root: HTMLElement, scope: any) => {
     if (!scope) return console.error("Z-State: scope required");
 
-    // s-for
     if (has(root, "for")) {
         const [alias, list] = attr(root, "for")
             .split(" in ")
@@ -263,7 +257,6 @@ export const hydrate = (root: HTMLElement, scope: any) => {
         return;
     }
 
-    // s-if
     if (has(root, "if")) {
         const path = attr(root, "if");
         const anchor = document.createComment("if");
@@ -289,7 +282,6 @@ export const hydrate = (root: HTMLElement, scope: any) => {
         return;
     }
 
-    // Directivas
     Array.from(root.attributes).forEach((a) => {
         if (!/^s-/.test(a.name)) return;
 
@@ -310,7 +302,6 @@ export const hydrate = (root: HTMLElement, scope: any) => {
         }
     });
 
-    // Hijos
     for (let c: any = root.firstElementChild; c; c = c.nextElementSibling) {
         hydrate(c, scope);
     }

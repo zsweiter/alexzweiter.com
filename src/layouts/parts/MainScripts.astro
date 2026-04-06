@@ -1,0 +1,103 @@
+---
+
+---
+
+<script is:inline>
+    function normalizePath(path) {
+        return path.replace(/\/+$/, '') || '/';
+    }
+
+    function isSameUrl(a, b) {
+        return (
+            a.origin === b.origin && normalizePath(a.pathname) === normalizePath(b.pathname) && a.search === b.search
+        );
+    }
+
+    document.addEventListener('click', function (e) {
+        var target = e.target;
+        var link = target.closest('a[href]');
+
+        if (!link) return;
+        if (link.target === '_blank') return;
+        if (link.hasAttribute('download')) return;
+        if (link.getAttribute('rel') === 'external') return;
+
+        var to = new URL(link.href, window.location.href);
+        var from = new URL(window.location.href);
+
+        if (isSameUrl(from, to)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        } else {
+            document.body.classList.remove('page-loaded');
+        }
+
+        if (to.hash) {
+            requestAnimationFrame(() => {
+                document.querySelector(to.hash)?.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+
+    if (typeof window.AppEvent !== 'object') {
+        window.AppEvent = {
+            subscribers: {},
+
+            dispatch(event, payload) {
+                if (!this.subscribers[event]) return;
+                this.subscribers[event].forEach(function (fn) {
+                    fn(payload);
+                });
+            },
+
+            listen(event, cb) {
+                if (!this.subscribers[event]) {
+                    this.subscribers[event] = [];
+                }
+
+                this.subscribers[event].push(cb);
+
+                return () => {
+                    this.subscribers[event] = this.subscribers[event].filter(function (fn) {
+                        return fn !== cb;
+                    });
+                };
+            }
+        };
+    }
+</script>
+<script is:inline data-astro-rerun>
+    (function () {
+        var styleEl = document.getElementById('viewport-variables');
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'viewport-variables';
+            document.head.appendChild(styleEl);
+        }
+
+        function setViewportUnits() {
+            var vh = window.innerHeight;
+            var vw = window.innerWidth;
+
+            var safeTop = 'env(safe-area-inset-top)';
+            var safeBottom = 'env(safe-area-inset-bottom)';
+            var safeLeft = 'env(safe-area-inset-left)';
+            var safeRight = 'env(safe-area-inset-right)';
+
+            styleEl.textContent = `:root { --vh: ${vh}px; --vw: ${vw}px; --safe-top: ${safeTop}; --safe-bottom: ${safeBottom}; --safe-left: ${safeLeft}; --safe-right: ${safeRight}; }`;
+        }
+
+        setViewportUnits();
+
+        var timeout;
+        function throttledResize() {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(setViewportUnits, 150);
+        }
+
+        window.addEventListener('resize', throttledResize);
+        window.addEventListener('orientationchange', throttledResize);
+    })();
+</script>

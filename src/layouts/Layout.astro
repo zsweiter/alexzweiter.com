@@ -3,6 +3,7 @@ import '@fontsource-variable/spline-sans-mono';
 import '@/assets/css/main.css';
 import AppHeader from './parts/AppHeader.astro';
 import AppFooter from './parts/AppFooter.astro';
+import MainScripts from './parts/MainScripts.astro';
 import MiniPlayer from '@/components/MiniPlayer.astro';
 import { ClientRouter } from 'astro:transitions';
 import { getLangFromUrl } from '@/i18n/utils';
@@ -29,112 +30,13 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
         <title>{title}</title>
-        <script is:inline>
-            function normalizePath(path) {
-                return path.replace(/\/+$/, '') || '/';
-            }
-
-            function isSameUrl(a, b) {
-                return (
-                    a.origin === b.origin &&
-                    normalizePath(a.pathname) === normalizePath(b.pathname) &&
-                    a.search === b.search
-                );
-            }
-
-            document.addEventListener('click', function (e) {
-                var target = e.target;
-                var link = target.closest('a[href]');
-
-                if (!link) return;
-                if (link.target === '_blank') return;
-                if (link.hasAttribute('download')) return;
-                if (link.getAttribute('rel') === 'external') return;
-
-                var to = new URL(link.href, window.location.href);
-                var from = new URL(window.location.href);
-
-                if (isSameUrl(from, to)) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-
-                    if (to.hash) {
-                        document.querySelector(to.hash)?.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                } else {
-                    document.body.classList.remove('page-loaded');
-                }
-            });
-
-            if (typeof window.AppEvent !== 'object') {
-                window.AppEvent = {
-                    subscribers: {},
-
-                    dispatch(event, payload) {
-                        if (!this.subscribers[event]) return;
-                        this.subscribers[event].forEach(function (fn) {
-                            fn(payload);
-                        });
-                    },
-
-                    listen(event, cb) {
-                        if (!this.subscribers[event]) {
-                            this.subscribers[event] = [];
-                        }
-
-                        this.subscribers[event].push(cb);
-
-                        return () => {
-                            this.subscribers[event] = this.subscribers[event].filter(function (fn) {
-                                return fn !== cb;
-                            });
-                        };
-                    }
-                };
-            }
-        </script>
-        <script is:inline data-astro-rerun>
-            (function () {
-                var styleEl = document.getElementById('viewport-variables');
-                if (!styleEl) {
-                    styleEl = document.createElement('style');
-                    styleEl.id = 'viewport-variables';
-                    document.head.appendChild(styleEl);
-                }
-
-                function setViewportUnits() {
-                    var vh = window.innerHeight;
-                    var vw = window.innerWidth;
-
-                    var safeTop = 'env(safe-area-inset-top)';
-                    var safeBottom = 'env(safe-area-inset-bottom)';
-                    var safeLeft = 'env(safe-area-inset-left)';
-                    var safeRight = 'env(safe-area-inset-right)';
-
-                    styleEl.textContent = `:root { --vh: ${vh}px; --vw: ${vw}px; --safe-top: ${safeTop}; --safe-bottom: ${safeBottom}; --safe-left: ${safeLeft}; --safe-right: ${safeRight}; }`;
-                }
-
-                setViewportUnits();
-
-                var timeout;
-                function throttledResize() {
-                    if (timeout) clearTimeout(timeout);
-                    timeout = setTimeout(setViewportUnits, 150);
-                }
-
-                window.addEventListener('resize', throttledResize);
-                window.addEventListener('orientationchange', throttledResize);
-            })();
-        </script>
-
+        <MainScripts />
         <ClientRouter />
     </head>
 
     <body class={`${pageClass}`} data-page={page} data-galaxy={page}>
         <AppHeader />
-        <MiniPlayer />
+        <!-- <MiniPlayer /> -->
         <main class="relative z-10 w-full min-h-screen flex flex-col" transition:name="view">
             <slot />
         </main>
@@ -169,16 +71,17 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
                 if (page == 'home') {
                     if (galaxy.isLastImageLoaded(galaxy.MAIN_TEXTURE)) {
                         galaxy.reinit();
-                    } else {
-                        galaxy.restoreBackgroundTexture();
-                        galaxy.zoomReset();
                     }
+                    // else {
+                    //     galaxy.restoreBackgroundTexture();
+                    //     galaxy.zoomReset();
+                    // }
                 } else {
-                    if (Math.random() > 0.5) {
-                        galaxy.zoomOut(0.65);
-                    } else {
-                        galaxy.zoomIn();
-                    }
+                    // if (Math.random() > 0.5) {
+                    //     galaxy.zoomOut(0.65);
+                    // } else {
+                    //     galaxy.zoomIn();
+                    // }
                 }
 
                 document.querySelectorAll('[data-ws-staggered]').forEach(item => {
@@ -207,31 +110,28 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
 
             window.audio = audioPlayer;
             window.AppEvent.listen('audio:play', ({ src, index, track }: any) => {
-                galaxy.zoomReset();
-                galaxy.fadedPauseSound().then(() => {
-                    audioPlayer.src = src;
-                    audioPlayer.index = index;
-                    audioPlayer.onloadeddata = () => {
-                        audioPlayer.play();
-                    };
-                });
-
-                galaxy.setPoster(track.poster);
+                // galaxy.zoomReset();
+                // galaxy.fadedPauseSound().then(() => {
+                //     audioPlayer.src = src;
+                //     audioPlayer.index = index;
+                //     audioPlayer.onloadeddata = () => {
+                //         audioPlayer.play();
+                //     };
+                // });
+                // galaxy.setPoster(track.poster);
             });
 
             window.AppEvent.listen('audio:resume', ({ track }: any) => {
-                galaxy.fadedPauseSound().then(() => {
-                    audioPlayer.play();
-                });
-
-                galaxy.setPoster(track.poster);
+                // galaxy.fadedPauseSound().then(() => {
+                //     audioPlayer.play();
+                // });
+                // galaxy.setPoster(track.poster);
             });
 
             window.AppEvent.listen('audio:pause', () => {
-                audioPlayer.pause();
-                galaxy.fadedResumeSound();
+                // audioPlayer.pause();
+                // galaxy.fadedResumeSound();
                 // galaxy.restoreBackgroundTexture();
-
                 // galaxy.disposePoster();
             });
 
@@ -246,12 +146,10 @@ const page = pathname === '/' ? 'home' : pathname.replace(/\//g, '').toLowerCase
                     progress: audioPlayer.currentTime / audioPlayer.duration || 0
                 });
             });
-        </script>
-        <script>
-            import { galaxy } from '@/webgl/background';
-            const container = document.querySelector<HTMLElement>('#canvas-container');
-            if (container) {
-                galaxy.setup(container);
+
+            const canvas = document.querySelector<HTMLElement>('#canvas-container');
+            if (canvas) {
+                galaxy.setup(canvas);
 
                 setTimeout(() => {
                     window.loaded = true;
